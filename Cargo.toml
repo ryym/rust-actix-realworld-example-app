@@ -1,0 +1,11 @@
+[package]
+authors = ["ryym <ryym.64@gmail.com>"]
+name = "conduit"
+version = "0.1.0"
+
+[dependencies]
+actix-web = "0.7.13"
+dotenv = "0.13.0"
+env_logger = "0.5.13"
+failure = "0.1.2"
+log = "0.4.5"
