@@ -17,6 +17,16 @@ extern crate frank_jwt;
 mod app;
 mod error;
 
+mod prelude {
+    use super::error;
+    use std::result;
+
+    pub use error::{Error, ErrorKind};
+    pub use failure::Fail;
+
+    pub type Result<T, E = error::Error> = result::Result<T, E>;
+}
+
 use actix_web::server;
 use std::env;
 
