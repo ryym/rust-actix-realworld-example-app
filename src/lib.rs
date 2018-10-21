@@ -4,6 +4,8 @@
 extern crate log;
 extern crate dotenv;
 extern crate env_logger;
+#[macro_use]
+extern crate failure;
 
 extern crate actix_web;
 #[macro_use]
@@ -13,6 +15,7 @@ extern crate serde_json;
 extern crate frank_jwt;
 
 mod app;
+mod error;
 
 use actix_web::server;
 use std::env;
