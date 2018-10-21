@@ -1,5 +1,9 @@
 //! This is my hobby implementation of <https://github.com/gothinkster/realworld>.
 
+// https://github.com/diesel-rs/diesel/issues/1785
+// TODO: Remove this after diesel published 1.4.
+#![allow(proc_macro_derive_resolution_fallback)]
+
 #[macro_use]
 extern crate log;
 extern crate dotenv;
@@ -14,10 +18,17 @@ extern crate serde_derive;
 extern crate serde_json;
 extern crate frank_jwt;
 
+extern crate chrono;
+#[macro_use]
+extern crate diesel;
+extern crate r2d2;
+
 mod app;
 mod config;
 mod error;
 mod hub;
+mod mdl;
+mod schema;
 
 mod prelude {
     use super::error;
