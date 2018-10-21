@@ -6,6 +6,11 @@ extern crate dotenv;
 extern crate env_logger;
 
 extern crate actix_web;
+#[macro_use]
+extern crate serde_derive;
+#[macro_use]
+extern crate serde_json;
+extern crate frank_jwt;
 
 mod app;
 
