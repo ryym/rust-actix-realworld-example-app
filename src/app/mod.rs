@@ -1,6 +1,7 @@
 use actix_web::{middleware::Logger, App, HttpRequest};
 
 mod auth;
+mod error;
 
 fn index(_req: &HttpRequest) -> &'static str {
     "Hello world!"
