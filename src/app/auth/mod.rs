@@ -1,9 +1,12 @@
 mod jwt;
 mod register_user;
+mod validate_signup;
 
 use actix_web::{Json, State};
 
-use self::{jwt::CanGenerateJwt, register_user::CanRegisterUser};
+use self::{
+    jwt::CanGenerateJwt, register_user::CanRegisterUser, validate_signup::CanValidateSignup,
+};
 use prelude::*;
 
 mod signup {
@@ -36,12 +39,12 @@ mod signup {
 
 pub fn sign_up<S>((form, hub): (Json<signup::Form>, State<S>)) -> Result<Json<signup::Success>>
 where
-    S: CanRegisterUser + CanGenerateJwt,
+    S: CanValidateSignup + CanRegisterUser + CanGenerateJwt,
 {
     debug!("sign up: {:?}", form);
 
-    // TODO: Validate form.
     let form = form.into_inner().user;
+    hub.validate_signup(&form)?;
 
     let user = hub.register_user(&form)?;
     let token = hub.generate_jwt(user.id)?;
