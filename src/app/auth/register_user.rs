@@ -1,6 +1,6 @@
 use diesel::{self, prelude::*};
-use pbkdf2::pbkdf2_simple;
 
+use super::password::CanHashPassword;
 use super::signup::UserForm;
 use db::{self, HaveDb};
 use hub::Hub;
@@ -8,7 +8,6 @@ use mdl::{NewCredential, NewUser, User};
 use prelude::*;
 
 impl RegisterUser for Hub {}
-impl HashPassword for Hub {}
 
 pub trait CanRegisterUser {
     fn register_user(&self, form: &UserForm) -> Result<User>;
@@ -58,18 +57,4 @@ fn insert_credential(conn: &db::Connection, user_id: i32, password_hash: String)
         .execute(conn)
         .context("register credential")?;
     Ok(())
-}
-
-const HASH_ITERATION_COUNT: u32 = 10000;
-
-pub trait CanHashPassword {
-    fn hash_password(&self, password: &str) -> Result<String>;
-}
-
-pub trait HashPassword {}
-impl<T: HashPassword> CanHashPassword for T {
-    fn hash_password(&self, password: &str) -> Result<String> {
-        let hash = pbkdf2_simple(password, HASH_ITERATION_COUNT).context("hash password")?;
-        Ok(hash)
-    }
 }

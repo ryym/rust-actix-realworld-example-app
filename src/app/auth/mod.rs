@@ -1,4 +1,5 @@
 mod jwt;
+mod password;
 mod register_user;
 mod validate_signup;
 
