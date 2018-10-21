@@ -1,5 +1,7 @@
-use actix_web::{Error as ActixError, Json};
+use actix_web::Json;
 use frank_jwt as jwt;
+
+use prelude::*;
 
 #[derive(Debug, Deserialize)]
 pub struct NewUser {
@@ -29,13 +31,13 @@ pub struct SignUpResponse {
     user: User,
 }
 
-pub fn sign_up(form: Json<SignUpForm>) -> Result<Json<SignUpResponse>, ActixError> {
+pub fn sign_up(form: Json<SignUpForm>) -> Result<Json<SignUpResponse>> {
     debug!("sign up: {:?}", form);
 
     // TODO: Validate form.
     // TODO: Register user to DB.
 
-    let token = generate_jwt(1).expect("generate jwt");
+    let token = generate_jwt(1)?;
     let user = User {
         token,
         id: 1,
