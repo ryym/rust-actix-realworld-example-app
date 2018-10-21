@@ -1,6 +1,7 @@
 // https://github.com/rust-lang-nursery/failure
 // https://rust-lang-nursery.github.io/failure/error-errorkind.html
 
+use diesel::result::Error as DieselError;
 use failure::{Backtrace, Context, Fail};
 use frank_jwt as jwt;
 use std::{
@@ -63,6 +64,19 @@ where
     fn from(ctx: Context<S>) -> Error {
         Error {
             inner: ctx.map(|s| ErrorKind::Misc(s.into())),
+        }
+    }
+}
+
+// We need to be able to convert diesel Error to our Error type
+// to satisfy the trait bound of diesel's Connection::transaction.
+// However usually we may not need this conversion because
+// we use the failure's `context` method to clarify error details,
+// instead of returning a diesel Error directly.
+impl From<DieselError> for Error {
+    fn from(err: DieselError) -> Error {
+        Error {
+            inner: Context::new(ErrorKind::Misc(err.to_string())),
         }
     }
 }

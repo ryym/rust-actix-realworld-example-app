@@ -47,30 +47,29 @@ pub fn sign_up<S: HaveConfig + HaveDb>(
     let user = state.use_db(|conn| {
         use diesel::prelude::*;
         use schema::{credentials::dsl::*, users::dsl::*};
+        conn.transaction(|| {
+            let new_user = NewUser {
+                username: form.username.clone(),
+                email: form.email.clone(),
+                bio: None,
+                image: None,
+            };
+            let user = diesel::insert_into(users)
+                .values(&new_user)
+                .get_result::<User>(conn)
+                .context("register user")?;
 
-        // TODO: Insert records inside of a transaction.
+            let new_cred = NewCredential {
+                user_id: user.id,
+                password_hash: hash_password(&form.password)?,
+            };
+            diesel::insert_into(credentials)
+                .values(&new_cred)
+                .execute(conn)
+                .context("register credential")?;
 
-        let new_user = NewUser {
-            username: form.username.clone(),
-            email: form.email.clone(),
-            bio: None,
-            image: None,
-        };
-        let user = diesel::insert_into(users)
-            .values(&new_user)
-            .get_result::<User>(conn)
-            .context("register user")?;
-
-        let new_cred = NewCredential {
-            user_id: user.id,
-            password_hash: hash_password(&form.password)?,
-        };
-        diesel::insert_into(credentials)
-            .values(&new_cred)
-            .execute(conn)
-            .context("register credential")?;
-
-        Ok(user)
+            Ok(user)
+        })
     })?;
 
     let token = generate_jwt(&state.config().jwt_secret_key, user.id)?;
