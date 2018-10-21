@@ -36,7 +36,7 @@ pub mod prelude {
     use std::result;
 
     pub use error::{Error, ErrorKind};
-    pub use failure::Fail;
+    pub use failure::{Fail, ResultExt};
 
     pub type Result<T, E = error::Error> = result::Result<T, E>;
 }
