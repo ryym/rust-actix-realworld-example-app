@@ -25,12 +25,13 @@ extern crate r2d2;
 
 mod app;
 mod config;
+mod db;
 mod error;
 mod hub;
 mod mdl;
 mod schema;
 
-mod prelude {
+pub mod prelude {
     use super::error;
     use std::result;
 
@@ -43,7 +44,7 @@ mod prelude {
 use actix_web::server;
 use std::env;
 
-pub fn run() {
+pub fn run() -> Result<(), error::Error> {
     dotenv::dotenv().ok();
 
     if env::var("RUST_LOG").ok().is_none() {
@@ -51,16 +52,25 @@ pub fn run() {
     }
     env_logger::init();
 
-    let jwt_secret_key = env::var("JWT_SECRET_KEY").expect("JWT_SECRET_KEY must be set");
+    let jwt_secret_key = must_get_env_var("JWT_SECRET_KEY");
     let config = config::Config { jwt_secret_key };
+
+    let db_url = must_get_env_var("DATABASE_URL");
+    let db_pool = db::new_pool(db_url)?;
 
     let port = env::var("PORT").unwrap_or("3000".to_owned());
     info!("Starting server at 127.0.0.1:{}", port);
 
     server::new(move || {
-        let hub = hub::Hub::create(config.clone());
+        let hub = hub::Hub::create(config.clone(), db_pool.clone());
         app::create(hub)
     }).bind(format!("127.0.0.1:{}", port))
     .expect("start server")
     .run();
+
+    Ok(())
+}
+
+fn must_get_env_var(key: &str) -> String {
+    env::var(key).expect(&format!("{} must be set", key))
 }

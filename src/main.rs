@@ -1,5 +1,7 @@
 extern crate conduit;
 
-fn main() {
-    conduit::run();
+use conduit::prelude::Error;
+
+fn main() -> Result<(), Error> {
+    conduit::run()
 }
