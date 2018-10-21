@@ -16,9 +16,11 @@ pub struct Error {
 
 #[derive(Clone, Debug, Fail)]
 pub enum ErrorKind {
+    #[fail(display = "validation failure")]
+    Validation(Vec<String>),
+
     #[fail(display = "{}", _0)]
     Misc(String),
-    // Auth, Validation, etc
 }
 
 impl Fail for Error {

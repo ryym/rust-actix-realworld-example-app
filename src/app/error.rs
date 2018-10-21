@@ -15,18 +15,29 @@ struct ErrorResponse {
 impl ResponseError for Error {
     fn error_response(&self) -> HttpResponse {
         match self.kind() {
+            ErrorKind::Validation(msgs) => error_res(
+                StatusCode::UNPROCESSABLE_ENTITY,
+                ErrorData {
+                    body: msgs.to_vec(),
+                },
+            ),
             ErrorKind::Misc(msg) => {
                 log_error(&self);
-                HttpResponse::new(StatusCode::INTERNAL_SERVER_ERROR)
-                    .into_builder()
-                    .json(ErrorResponse {
-                        errors: ErrorData {
-                            body: vec![msg.clone()],
-                        },
-                    })
+                error_res(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    ErrorData {
+                        body: vec![msg.clone()],
+                    },
+                )
             }
         }
     }
+}
+
+fn error_res(code: StatusCode, errors: ErrorData) -> HttpResponse {
+    HttpResponse::new(code)
+        .into_builder()
+        .json(ErrorResponse { errors })
 }
 
 fn log_error(err: &Error) {
