@@ -21,6 +21,12 @@ impl ResponseError for Error {
                     body: msgs.to_vec(),
                 },
             ),
+            ErrorKind::Unauthorized => error_res(
+                StatusCode::UNAUTHORIZED,
+                ErrorData {
+                    body: vec!["authentication required".to_owned()],
+                },
+            ),
             ErrorKind::Db => {
                 log_error(&self);
                 error_res(

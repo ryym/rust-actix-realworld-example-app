@@ -19,6 +19,9 @@ pub enum ErrorKind {
     #[fail(display = "validation failure")]
     Validation(Vec<String>),
 
+    #[fail(display = "authentication required")]
+    Unauthorized,
+
     #[fail(display = "database operation failure")]
     Db,
 
