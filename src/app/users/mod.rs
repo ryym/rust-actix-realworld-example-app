@@ -1,5 +1,4 @@
 mod authenticate;
-mod jwt;
 mod password;
 mod register_user;
 mod validate_signup;
@@ -7,9 +6,10 @@ mod validate_signup;
 use actix_web::{Json, State};
 
 use self::{
-    authenticate::CanAuthenticate, jwt::CanGenerateJwt, register_user::CanRegisterUser,
+    authenticate::CanAuthenticate, register_user::CanRegisterUser,
     validate_signup::CanValidateSignup,
 };
+use jwt::CanGenerateJwt;
 use mdl;
 use prelude::*;
 

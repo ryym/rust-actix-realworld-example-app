@@ -29,6 +29,7 @@ mod config;
 mod db;
 mod error;
 mod hub;
+mod jwt;
 mod mdl;
 mod schema;
 
