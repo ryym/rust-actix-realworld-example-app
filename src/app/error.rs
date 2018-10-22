@@ -21,6 +21,15 @@ impl ResponseError for Error {
                     body: msgs.to_vec(),
                 },
             ),
+            ErrorKind::Db => {
+                log_error(&self);
+                error_res(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    ErrorData {
+                        body: vec![format!("{}", self)],
+                    },
+                )
+            }
             ErrorKind::Misc(msg) => {
                 log_error(&self);
                 error_res(

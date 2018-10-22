@@ -19,6 +19,9 @@ pub enum ErrorKind {
     #[fail(display = "validation failure")]
     Validation(Vec<String>),
 
+    #[fail(display = "database operation failure")]
+    Db,
+
     #[fail(display = "{}", _0)]
     Misc(String),
 }
@@ -70,16 +73,11 @@ where
     }
 }
 
-// We need to be able to convert diesel Error to our Error type
+// We need to be able to convert diesel Error to our Error type implicitly
 // to satisfy the trait bound of diesel's Connection::transaction.
-// However usually we may not need this conversion because
-// we use the failure's `context` method to clarify error details,
-// instead of returning a diesel Error directly.
 impl From<DieselError> for Error {
     fn from(err: DieselError) -> Error {
-        Error {
-            inner: Context::new(ErrorKind::Misc(err.to_string())),
-        }
+        err.context(ErrorKind::Db).into()
     }
 }
 
