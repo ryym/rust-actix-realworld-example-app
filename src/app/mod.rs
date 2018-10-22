@@ -14,7 +14,9 @@ pub fn create(hub: Hub) -> App<Hub> {
         .middleware(Logger::default())
         .resource("/", |r| r.f(index))
         .scope("/api", |scope| {
-            scope.resource("users", |r| r.post().with(auth::sign_up))
+            scope
+                .resource("users", |r| r.post().with(auth::sign_up))
+                .resource("users/login", |r| r.post().with(auth::sign_in))
         });
     app
 }

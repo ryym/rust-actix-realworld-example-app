@@ -1,3 +1,4 @@
+mod authenticate;
 mod jwt;
 mod password;
 mod register_user;
@@ -6,14 +7,29 @@ mod validate_signup;
 use actix_web::{Json, State};
 
 use self::{
-    jwt::CanGenerateJwt, register_user::CanRegisterUser, validate_signup::CanValidateSignup,
+    authenticate::CanAuthenticate, jwt::CanGenerateJwt, register_user::CanRegisterUser,
+    validate_signup::CanValidateSignup,
 };
+use mdl;
 use prelude::*;
 
 mod signup {
     #[derive(Debug, Deserialize)]
     pub struct UserForm {
         pub username: String,
+        pub email: String,
+        pub password: String,
+    }
+
+    #[derive(Debug, Deserialize)]
+    pub struct Form {
+        pub user: UserForm,
+    }
+}
+
+mod signin {
+    #[derive(Debug, Deserialize)]
+    pub struct UserForm {
         pub email: String,
         pub password: String,
     }
@@ -33,6 +49,18 @@ pub struct AuthUser {
     pub image: Option<String>,
 }
 
+impl AuthUser {
+    fn from_user(token: String, user: mdl::User) -> AuthUser {
+        AuthUser {
+            token,
+            username: user.username,
+            email: user.email,
+            bio: user.bio,
+            image: user.image,
+        }
+    }
+}
+
 #[derive(Debug, Serialize)]
 pub struct AuthSuccess {
     pub user: AuthUser,
@@ -50,12 +78,18 @@ where
     let user = hub.register_user(&form)?;
     let token = hub.generate_jwt(user.id)?;
 
-    let user = AuthUser {
-        token,
-        username: user.username,
-        email: user.email,
-        bio: user.bio,
-        image: user.image,
-    };
+    let user = AuthUser::from_user(token, user);
+    Ok(Json(AuthSuccess { user }))
+}
+
+pub fn sign_in<S>((form, hub): (Json<signin::Form>, State<S>)) -> Result<Json<AuthSuccess>>
+where
+    S: CanAuthenticate + CanGenerateJwt,
+{
+    let form = form.into_inner().user;
+    let user = hub.authenticate(&form)?;
+    let token = hub.generate_jwt(user.id)?;
+
+    let user = AuthUser::from_user(token, user);
     Ok(Json(AuthSuccess { user }))
 }
