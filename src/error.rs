@@ -88,7 +88,7 @@ impl From<DieselError> for Error {
 // In v3.0.2, frank_jwt's Error does not implement std::error::Error
 // but it was fixed in the master branch.
 #[derive(Debug)]
-pub struct JwtError(jwt::Error);
+pub struct JwtError(pub jwt::Error);
 
 impl Display for JwtError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

@@ -26,6 +26,7 @@ extern crate diesel;
 extern crate r2d2;
 
 mod app;
+mod auth;
 mod config;
 mod db;
 mod error;
