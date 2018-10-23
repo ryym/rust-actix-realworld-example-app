@@ -17,6 +17,7 @@ pub fn create(hub: Hub) -> App<Hub> {
             scope
                 .resource("users", |r| r.post().with(users::sign_up))
                 .resource("users/login", |r| r.post().with(users::sign_in))
+                .resource("user", |r| r.get().with(users::get_user))
         });
     app
 }

@@ -9,6 +9,7 @@ use self::{
     authenticate::CanAuthenticate, register_user::CanRegisterUser,
     validate_signup::CanValidateSignup,
 };
+use auth::Auth;
 use jwt::CanGenerateJwt;
 use mdl;
 use prelude::*;
@@ -91,5 +92,10 @@ where
     let token = hub.generate_jwt(user.id)?;
 
     let user = User::from_model(token, user);
+    Ok(Json(UserResponse { user }))
+}
+
+pub fn get_user(auth: Auth) -> Result<Json<UserResponse>> {
+    let user = User::from_model(auth.token, auth.user);
     Ok(Json(UserResponse { user }))
 }
