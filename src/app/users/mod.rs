@@ -41,7 +41,7 @@ mod signin {
 }
 
 #[derive(Debug, Serialize)]
-pub struct AuthUser {
+pub struct User {
     pub email: String,
     pub token: String,
     pub username: String,
@@ -49,9 +49,9 @@ pub struct AuthUser {
     pub image: Option<String>,
 }
 
-impl AuthUser {
-    fn from_user(token: String, user: mdl::User) -> AuthUser {
-        AuthUser {
+impl User {
+    fn from_model(token: String, user: mdl::User) -> User {
+        User {
             token,
             username: user.username,
             email: user.email,
@@ -62,11 +62,11 @@ impl AuthUser {
 }
 
 #[derive(Debug, Serialize)]
-pub struct AuthSuccess {
-    pub user: AuthUser,
+pub struct UserResponse {
+    pub user: User,
 }
 
-pub fn sign_up<S>((form, hub): (Json<signup::Form>, State<S>)) -> Result<Json<AuthSuccess>>
+pub fn sign_up<S>((form, hub): (Json<signup::Form>, State<S>)) -> Result<Json<UserResponse>>
 where
     S: CanValidateSignup + CanRegisterUser + CanGenerateJwt,
 {
@@ -78,11 +78,11 @@ where
     let user = hub.register_user(&form)?;
     let token = hub.generate_jwt(user.id)?;
 
-    let user = AuthUser::from_user(token, user);
-    Ok(Json(AuthSuccess { user }))
+    let user = User::from_model(token, user);
+    Ok(Json(UserResponse { user }))
 }
 
-pub fn sign_in<S>((form, hub): (Json<signin::Form>, State<S>)) -> Result<Json<AuthSuccess>>
+pub fn sign_in<S>((form, hub): (Json<signin::Form>, State<S>)) -> Result<Json<UserResponse>>
 where
     S: CanAuthenticate + CanGenerateJwt,
 {
@@ -90,6 +90,6 @@ where
     let user = hub.authenticate(&form)?;
     let token = hub.generate_jwt(user.id)?;
 
-    let user = AuthUser::from_user(token, user);
-    Ok(Json(AuthSuccess { user }))
+    let user = User::from_model(token, user);
+    Ok(Json(UserResponse { user }))
 }
