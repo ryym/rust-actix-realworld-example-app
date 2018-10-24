@@ -1,12 +1,15 @@
 mod authenticate;
 mod password;
 mod register_user;
+mod update_user;
 mod validate_signup;
 
 use actix_web::{Json, State};
 
 use self::{
-    authenticate::CanAuthenticate, register_user::CanRegisterUser,
+    authenticate::CanAuthenticate,
+    register_user::CanRegisterUser,
+    update_user::{CanUpdateUser, UserChanges},
     validate_signup::CanValidateSignup,
 };
 use auth::Auth;
@@ -48,6 +51,20 @@ pub struct User {
     pub username: String,
     pub bio: Option<String>,
     pub image: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UserChange {
+    pub email: Option<String>,
+    pub username: Option<String>,
+    pub bio: Option<String>,
+    pub image: Option<String>,
+    pub password: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UserChangeForm {
+    user: UserChange,
 }
 
 impl User {
@@ -97,5 +114,30 @@ where
 
 pub fn get_user(auth: Auth) -> Result<Json<UserResponse>> {
     let user = User::from_model(auth.token, auth.user);
+    Ok(Json(UserResponse { user }))
+}
+
+pub fn update_user<S>(
+    (hub, form, auth): (State<S>, Json<UserChangeForm>, Auth),
+) -> Result<Json<UserResponse>>
+where
+    S: CanUpdateUser,
+{
+    // TODO: Validate input.
+    let form = form.into_inner().user;
+    let user = hub.update_user(
+        auth.user,
+        UserChanges {
+            user: mdl::UserChange {
+                username: form.username,
+                email: form.email,
+                bio: Some(form.bio),
+                image: Some(form.image),
+            },
+            new_password: form.password,
+        },
+    )?;
+
+    let user = User::from_model(auth.token, user);
     Ok(Json(UserResponse { user }))
 }
