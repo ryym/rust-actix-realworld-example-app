@@ -57,7 +57,11 @@ pub fn run() -> Result<(), error::Error> {
     env_logger::init();
 
     let jwt_secret_key = must_get_env_var("JWT_SECRET_KEY");
-    let config = config::Config { jwt_secret_key };
+    let frontend_origin = env::var("FRONTEND_ORIGIN").ok();
+    let config = config::Config {
+        jwt_secret_key,
+        frontend_origin,
+    };
 
     let db_url = must_get_env_var("DATABASE_URL");
     let db_pool = db::new_pool(db_url)?;
@@ -67,7 +71,7 @@ pub fn run() -> Result<(), error::Error> {
 
     server::new(move || {
         let hub = hub::Hub::create(config.clone(), db_pool.clone());
-        app::create(hub)
+        app::create(hub, &config)
     }).bind(format!("127.0.0.1:{}", port))
     .expect("start server")
     .run();
