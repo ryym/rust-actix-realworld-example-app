@@ -52,14 +52,15 @@ impl<T: Authenticate> CanAuthenticate for T {
         let user = self.use_db(|conn| {
             use diesel::prelude::*;
             use schema::users::dsl::*;
-            let user = users.find(payload.id).first(conn).optional()?;
+
+            let user = users
+                .find(payload.id)
+                .first(conn)
+                .context(ErrorKind::Auth)?;
             Ok(user)
         })?;
 
-        match user {
-            Some(user) => Ok(Auth { user, token }),
-            None => Err(ErrorKind::Auth.into()),
-        }
+        Ok(Auth { user, token })
     }
 }
 
