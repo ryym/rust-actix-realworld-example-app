@@ -1,6 +1,6 @@
 use diesel::prelude::*;
 
-use super::signup::UserForm;
+use super::SignupUser;
 use db::HaveDb;
 use hub::Hub;
 use prelude::*;
@@ -20,7 +20,7 @@ impl ValidateSignup for Hub {}
 //   - length: 8..=72
 
 pub trait CanValidateSignup {
-    fn validate_signup(&self, form: &UserForm) -> Result<()>;
+    fn validate_signup(&self, form: &SignupUser) -> Result<()>;
 }
 
 pub trait ValidateSignup: HaveDb {}
@@ -28,7 +28,7 @@ impl<T: ValidateSignup> CanValidateSignup for T {
     // XXX: We should implement some generic validation module
     // or find a crate to avoid manual if-else validation.
     // TODO: Implement all validations.
-    fn validate_signup(&self, form: &UserForm) -> Result<()> {
+    fn validate_signup(&self, form: &SignupUser) -> Result<()> {
         use diesel::dsl::{exists, select};
         use schema::users::dsl::*;
 

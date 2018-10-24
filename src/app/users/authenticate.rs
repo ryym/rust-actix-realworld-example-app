@@ -1,4 +1,4 @@
-use super::{password::CanCheckPassword, signin::UserForm};
+use super::{password::CanCheckPassword, SigninUser};
 use db::HaveDb;
 use hub::Hub;
 use mdl::{Credential, User};
@@ -7,12 +7,12 @@ use prelude::*;
 impl Authenticate for Hub {}
 
 pub trait CanAuthenticate {
-    fn authenticate(&self, form: &UserForm) -> Result<User>;
+    fn authenticate(&self, form: &SigninUser) -> Result<User>;
 }
 
 pub trait Authenticate: HaveDb + CanCheckPassword {}
 impl<T: Authenticate> CanAuthenticate for T {
-    fn authenticate(&self, form: &UserForm) -> Result<User> {
+    fn authenticate(&self, form: &SigninUser) -> Result<User> {
         let user_cred = self.use_db(|conn| {
             use diesel::prelude::*;
             use schema::{credentials::dsl::*, users::dsl::*};

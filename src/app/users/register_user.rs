@@ -1,7 +1,7 @@
 use diesel::{self, prelude::*};
 
 use super::password::CanHashPassword;
-use super::signup::UserForm;
+use super::SignupUser;
 use db::{self, HaveDb};
 use hub::Hub;
 use mdl::{NewCredential, NewUser, User};
@@ -10,12 +10,12 @@ use prelude::*;
 impl RegisterUser for Hub {}
 
 pub trait CanRegisterUser {
-    fn register_user(&self, form: &UserForm) -> Result<User>;
+    fn register_user(&self, form: &SignupUser) -> Result<User>;
 }
 
 pub trait RegisterUser: HaveDb + CanHashPassword {}
 impl<T: RegisterUser> CanRegisterUser for T {
-    fn register_user(&self, form: &UserForm) -> Result<User> {
+    fn register_user(&self, form: &SignupUser) -> Result<User> {
         let user = self.use_db(|conn| {
             conn.transaction(|| {
                 let user = insert_user(conn, &form)?;
@@ -29,7 +29,7 @@ impl<T: RegisterUser> CanRegisterUser for T {
     }
 }
 
-fn insert_user(conn: &db::Connection, form: &UserForm) -> Result<User> {
+fn insert_user(conn: &db::Connection, form: &SignupUser) -> Result<User> {
     use schema::users::dsl::*;
 
     let new_user = NewUser {

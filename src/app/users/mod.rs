@@ -17,33 +17,6 @@ use jwt::CanGenerateJwt;
 use mdl;
 use prelude::*;
 
-mod signup {
-    #[derive(Debug, Deserialize)]
-    pub struct UserForm {
-        pub username: String,
-        pub email: String,
-        pub password: String,
-    }
-
-    #[derive(Debug, Deserialize)]
-    pub struct Form {
-        pub user: UserForm,
-    }
-}
-
-mod signin {
-    #[derive(Debug, Deserialize)]
-    pub struct UserForm {
-        pub email: String,
-        pub password: String,
-    }
-
-    #[derive(Debug, Deserialize)]
-    pub struct Form {
-        pub user: UserForm,
-    }
-}
-
 #[derive(Debug, Serialize)]
 pub struct User {
     pub email: String,
@@ -51,20 +24,6 @@ pub struct User {
     pub username: String,
     pub bio: Option<String>,
     pub image: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct UserChange {
-    pub email: Option<String>,
-    pub username: Option<String>,
-    pub bio: Option<String>,
-    pub image: Option<String>,
-    pub password: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct UserChangeForm {
-    user: UserChange,
 }
 
 impl User {
@@ -84,7 +43,34 @@ pub struct UserResponse {
     pub user: User,
 }
 
-pub fn sign_up<S>((form, hub): (Json<signup::Form>, State<S>)) -> Result<Json<UserResponse>>
+#[derive(Debug, Deserialize)]
+pub struct In<U> {
+    user: U,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SignupUser {
+    pub username: String,
+    pub email: String,
+    pub password: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SigninUser {
+    pub email: String,
+    pub password: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UserChange {
+    pub email: Option<String>,
+    pub username: Option<String>,
+    pub bio: Option<String>,
+    pub image: Option<String>,
+    pub password: Option<String>,
+}
+
+pub fn sign_up<S>((form, hub): (Json<In<SignupUser>>, State<S>)) -> Result<Json<UserResponse>>
 where
     S: CanValidateSignup + CanRegisterUser + CanGenerateJwt,
 {
@@ -100,7 +86,7 @@ where
     Ok(Json(UserResponse { user }))
 }
 
-pub fn sign_in<S>((form, hub): (Json<signin::Form>, State<S>)) -> Result<Json<UserResponse>>
+pub fn sign_in<S>((form, hub): (Json<In<SigninUser>>, State<S>)) -> Result<Json<UserResponse>>
 where
     S: CanAuthenticate + CanGenerateJwt,
 {
@@ -118,7 +104,7 @@ pub fn get_user(auth: Auth) -> Result<Json<UserResponse>> {
 }
 
 pub fn update_user<S>(
-    (hub, form, auth): (State<S>, Json<UserChangeForm>, Auth),
+    (hub, form, auth): (State<S>, Json<In<UserChange>>, Auth),
 ) -> Result<Json<UserResponse>>
 where
     S: CanUpdateUser,
