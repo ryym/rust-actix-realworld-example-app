@@ -67,12 +67,11 @@ fn log_error(err: &Error) {
     };
 }
 
-pub fn not_found<S>(_: &HttpRequest<S>, _: HttpResponse) -> Result<Response, ActixError> {
-    let res = error_res(
-        StatusCode::NOT_FOUND,
-        ErrorData {
+pub fn not_found<S>(_: &HttpRequest<S>, res: HttpResponse) -> Result<Response, ActixError> {
+    let res = res.into_builder().json(ErrorResponse {
+        errors: ErrorData {
             body: vec!["not found".to_owned()],
         },
-    );
+    });
     Ok(Response::Done(res))
 }
