@@ -25,6 +25,9 @@ pub enum ErrorKind {
     #[fail(display = "database operation failure")]
     Db,
 
+    #[fail(display = "record not found")]
+    NotFound,
+
     #[fail(display = "{}", _0)]
     Misc(String),
 }
@@ -80,7 +83,10 @@ where
 // to satisfy the trait bound of diesel's Connection::transaction.
 impl From<DieselError> for Error {
     fn from(err: DieselError) -> Error {
-        err.context(ErrorKind::Db).into()
+        match err {
+            DieselError::NotFound => err.context(ErrorKind::NotFound),
+            _ => err.context(ErrorKind::Db),
+        }.into()
     }
 }
 

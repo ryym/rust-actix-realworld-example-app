@@ -38,6 +38,12 @@ impl ResponseError for Error {
                     body: vec![self.to_string()],
                 },
             ),
+            ErrorKind::NotFound => error_res(
+                StatusCode::NOT_FOUND,
+                ErrorData {
+                    body: vec![self.to_string()],
+                },
+            ),
             ErrorKind::Misc(msg) => error_res(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 ErrorData {
