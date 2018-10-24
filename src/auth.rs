@@ -21,13 +21,13 @@ pub trait DecodeAuthToken: CanDecodeJwt {}
 impl<T: DecodeAuthToken> CanDecodeAuthToken for T {
     fn decode_auth_token<U: DeserializeOwned>(&self, token: &str) -> Result<U> {
         if !token.starts_with(TOKEN_PREFIX) {
-            return Err(ErrorKind::Unauthorized.into());
+            return Err(ErrorKind::Auth.into());
         }
         let token = token.replacen(TOKEN_PREFIX, "", 1);
 
         match self.decode_jwt(&token)? {
             Decoded::Ok(payload) => Ok(payload),
-            Decoded::Invalid(err) => Err(JwtError(err).context(ErrorKind::Unauthorized).into()),
+            Decoded::Invalid(err) => Err(JwtError(err).context(ErrorKind::Auth).into()),
         }
     }
 }
@@ -40,7 +40,7 @@ pub trait Authenticate: CanDecodeAuthToken + HaveDb {}
 impl<T: Authenticate> CanAuthenticate for T {
     fn authenticate<S>(&self, req: &HttpRequest<S>) -> Result<Auth> {
         let token = match req.headers().get(AUTHORIZATION) {
-            None => return Err(ErrorKind::Unauthorized.into()),
+            None => return Err(ErrorKind::Auth.into()),
             Some(token) => token
                 .to_str()
                 .context("read authorization header")?
@@ -58,7 +58,7 @@ impl<T: Authenticate> CanAuthenticate for T {
 
         match user {
             Some(user) => Ok(Auth { user, token }),
-            None => Err(ErrorKind::Unauthorized.into()),
+            None => Err(ErrorKind::Auth.into()),
         }
     }
 }
