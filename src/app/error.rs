@@ -1,4 +1,7 @@
-use actix_web::{http::StatusCode, HttpResponse, ResponseError};
+use actix_web::{
+    http::StatusCode, middleware::Response, Error as ActixError, HttpRequest, HttpResponse,
+    ResponseError,
+};
 
 use prelude::*;
 
@@ -62,4 +65,14 @@ fn log_error(err: &Error) {
     } else {
         error!("ERROR: {}", err);
     };
+}
+
+pub fn not_found<S>(_: &HttpRequest<S>, _: HttpResponse) -> Result<Response, ActixError> {
+    let res = error_res(
+        StatusCode::NOT_FOUND,
+        ErrorData {
+            body: vec!["not found".to_owned()],
+        },
+    );
+    Ok(Response::Done(res))
 }

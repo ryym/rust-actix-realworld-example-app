@@ -1,4 +1,8 @@
-use actix_web::{middleware::Logger, App, HttpRequest};
+use actix_web::{
+    http::StatusCode,
+    middleware::{ErrorHandlers, Logger},
+    App, HttpRequest,
+};
 
 use hub::Hub;
 
@@ -12,6 +16,7 @@ fn index(_req: &HttpRequest<Hub>) -> &'static str {
 pub fn create(hub: Hub) -> App<Hub> {
     let app = App::with_state(hub)
         .middleware(Logger::default())
+        .middleware(ErrorHandlers::new().handler(StatusCode::NOT_FOUND, error::not_found))
         .resource("/", |r| r.f(index))
         .scope("/api", |scope| {
             scope
