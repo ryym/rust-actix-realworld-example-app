@@ -1,6 +1,7 @@
 use diesel::{
     self,
     r2d2::{self, ConnectionManager, PooledConnection},
+    result::Error as DieselError,
 };
 
 use prelude::*;
@@ -25,4 +26,17 @@ pub trait HaveDb {
     fn use_db<F, T>(&self, f: F) -> Result<T>
     where
         F: FnOnce(&Connection) -> Result<T>;
+}
+
+/// Ignores diesel's `QueryBuilderError` silently. This error could occur when
+/// you run an update with a changeset whose all fields are `None`.
+/// In that case, this returns `Ok(None)`.
+pub fn may_update<T>(result: Result<T, DieselError>) -> Result<Option<T>, DieselError> {
+    match result {
+        Ok(value) => Ok(Some(value)),
+        Err(err) => match err {
+            DieselError::QueryBuilderError(_) => Ok(None),
+            err => Err(err),
+        },
+    }
 }
