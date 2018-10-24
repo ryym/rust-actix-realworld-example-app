@@ -14,6 +14,8 @@ struct ErrorResponse {
 
 impl ResponseError for Error {
     fn error_response(&self) -> HttpResponse {
+        log_error(&self);
+
         match self.kind() {
             ErrorKind::Validation(msgs) => error_res(
                 StatusCode::UNPROCESSABLE_ENTITY,
@@ -24,27 +26,21 @@ impl ResponseError for Error {
             ErrorKind::Auth => error_res(
                 StatusCode::UNAUTHORIZED,
                 ErrorData {
-                    body: vec![ErrorKind::Auth.to_string()],
+                    body: vec![self.to_string()],
                 },
             ),
-            ErrorKind::Db => {
-                log_error(&self);
-                error_res(
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    ErrorData {
-                        body: vec![format!("{}", self)],
-                    },
-                )
-            }
-            ErrorKind::Misc(msg) => {
-                log_error(&self);
-                error_res(
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    ErrorData {
-                        body: vec![msg.clone()],
-                    },
-                )
-            }
+            ErrorKind::Db => error_res(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                ErrorData {
+                    body: vec![self.to_string()],
+                },
+            ),
+            ErrorKind::Misc(msg) => error_res(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                ErrorData {
+                    body: vec![msg.clone()],
+                },
+            ),
         }
     }
 }
