@@ -22,6 +22,15 @@ pub struct NewUser {
     pub image: Option<String>,
 }
 
+#[derive(Debug, AsChangeset)]
+#[table_name = "users"]
+pub struct UserChange {
+    pub username: Option<String>,
+    pub email: Option<String>,
+    pub bio: Option<Option<String>>,
+    pub image: Option<Option<String>>,
+}
+
 #[derive(Debug, Queryable)]
 pub struct Credential {
     pub id: i32,
@@ -36,4 +45,10 @@ pub struct Credential {
 pub struct NewCredential {
     pub user_id: i32,
     pub password_hash: String,
+}
+
+#[derive(Debug, AsChangeset)]
+#[table_name = "credentials"]
+pub struct CredentialChange {
+    pub password_hash: Option<String>,
 }
