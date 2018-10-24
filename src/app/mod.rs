@@ -8,6 +8,7 @@ use config::Config;
 use hub::Hub;
 
 mod error;
+mod profiles;
 mod users;
 
 fn index(_req: &HttpRequest<Hub>) -> &'static str {
@@ -24,13 +25,19 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
                 Some(ref origin) => scope.middleware(enable_cors(origin)),
                 None => scope,
             };
-            scope
+            let scope = scope
                 .resource("users", |r| r.post().with(users::sign_up))
                 .resource("users/login", |r| r.post().with(users::sign_in))
                 .resource("user", |r| {
                     r.get().with(users::get_user);
                     r.put().with(users::update_user)
-                })
+                });
+
+            let scope = scope.resource("profiles/{username}", |r| {
+                r.get().with(profiles::get_profile)
+            });
+
+            scope
         })
 }
 
