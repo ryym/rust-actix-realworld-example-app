@@ -1,6 +1,6 @@
 use diesel::prelude::*;
 
-use super::Profile;
+use super::{find_user, Profile};
 use db;
 use hub::Hub;
 use mdl::User;
@@ -25,21 +25,8 @@ impl<T: FindProfile> CanFindProfile for T {
             Ok((user, following))
         })?;
 
-        Ok(Profile {
-            username: user.username,
-            bio: user.bio,
-            image: user.image,
-            following,
-        })
+        Ok(Profile::from_user(user, following))
     }
-}
-
-fn find_user(conn: &db::Connection, username: &str) -> Result<User> {
-    use schema::users as u;
-
-    let user = u::table.filter(u::username.eq(username)).first(conn)?;
-
-    Ok(user)
 }
 
 fn is_follower(conn: &db::Connection, user_id: i32, follower_id: i32) -> Result<bool> {

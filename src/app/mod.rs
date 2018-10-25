@@ -25,6 +25,7 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
                 Some(ref origin) => scope.middleware(enable_cors(origin)),
                 None => scope,
             };
+
             let scope = scope
                 .resource("users", |r| r.post().with(users::sign_up))
                 .resource("users/login", |r| r.post().with(users::sign_in))
@@ -33,9 +34,12 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
                     r.put().with(users::update_user)
                 });
 
-            let scope = scope.resource("profiles/{username}", |r| {
-                r.get().with(profiles::get_profile)
-            });
+            let scope = scope
+                .resource("profiles/{username}", |r| {
+                    r.get().with(profiles::get_profile)
+                }).resource("profiles/{username}/follow", |r| {
+                    r.post().with(profiles::follow)
+                });
 
             scope
         })
