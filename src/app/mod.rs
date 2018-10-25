@@ -38,7 +38,8 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
                 .resource("profiles/{username}", |r| {
                     r.get().with(profiles::get_profile)
                 }).resource("profiles/{username}/follow", |r| {
-                    r.post().with(profiles::follow)
+                    r.post().with(profiles::follow);
+                    r.delete().with(profiles::unfollow)
                 });
 
             scope

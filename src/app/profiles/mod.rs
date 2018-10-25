@@ -1,10 +1,12 @@
 mod add_follower;
 mod find_profile;
+mod remove_follower;
 
 use actix_web::{Json, Path, State};
 
 use self::add_follower::CanAddFollower;
 use self::find_profile::CanFindProfile;
+use self::remove_follower::CanRemoveFollower;
 use auth::Auth;
 use db;
 use mdl::User;
@@ -65,5 +67,15 @@ where
     S: CanAddFollower,
 {
     let profile = hub.add_follower(&path.username, auth.user.id)?;
+    Ok(Json(ProfileResponse { profile }))
+}
+
+pub fn unfollow<S>(
+    (hub, path, auth): (State<S>, Path<ProfilePath>, Auth),
+) -> Result<Json<ProfileResponse>>
+where
+    S: CanRemoveFollower,
+{
+    let profile = hub.remove_follower(&path.username, auth.user.id)?;
     Ok(Json(ProfileResponse { profile }))
 }
