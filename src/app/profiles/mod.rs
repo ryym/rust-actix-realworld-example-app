@@ -7,6 +7,7 @@ use actix_web::{Json, Path, State};
 use self::add_follower::CanAddFollower;
 use self::find_profile::CanFindProfile;
 use self::remove_follower::CanRemoveFollower;
+use super::res::{Profile, ProfileResponse};
 use auth::Auth;
 use db;
 use mdl::User;
@@ -18,30 +19,6 @@ fn find_user(conn: &db::Connection, username: &str) -> Result<User> {
 
     let user = u::table.filter(u::username.eq(username)).first(conn)?;
     Ok(user)
-}
-
-#[derive(Debug, Serialize)]
-pub struct Profile {
-    username: String,
-    bio: Option<String>,
-    image: Option<String>,
-    following: bool,
-}
-
-impl Profile {
-    pub fn from_user(user: User, following: bool) -> Profile {
-        Profile {
-            username: user.username,
-            bio: user.bio,
-            image: user.image,
-            following,
-        }
-    }
-}
-
-#[derive(Debug, Serialize)]
-pub struct ProfileResponse {
-    profile: Profile,
 }
 
 #[derive(Debug, Deserialize)]

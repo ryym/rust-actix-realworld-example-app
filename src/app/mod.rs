@@ -9,6 +9,7 @@ use hub::Hub;
 
 mod error;
 mod profiles;
+mod res;
 mod users;
 
 fn index(_req: &HttpRequest<Hub>) -> &'static str {

@@ -12,36 +12,11 @@ use self::{
     update_user::{CanUpdateUser, UserChanges},
     validate_signup::CanValidateSignup,
 };
+use super::res::{User, UserResponse};
 use auth::Auth;
 use jwt::CanGenerateJwt;
 use mdl;
 use prelude::*;
-
-#[derive(Debug, Serialize)]
-pub struct User {
-    pub email: String,
-    pub token: String,
-    pub username: String,
-    pub bio: Option<String>,
-    pub image: Option<String>,
-}
-
-impl User {
-    fn from_model(token: String, user: mdl::User) -> User {
-        User {
-            token,
-            username: user.username,
-            email: user.email,
-            bio: user.bio,
-            image: user.image,
-        }
-    }
-}
-
-#[derive(Debug, Serialize)]
-pub struct UserResponse {
-    pub user: User,
-}
 
 #[derive(Debug, Deserialize)]
 pub struct In<U> {
