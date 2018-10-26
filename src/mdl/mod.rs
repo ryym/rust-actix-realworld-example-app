@@ -1,4 +1,5 @@
-pub mod follower;
-pub mod user;
+mod article;
+mod follower;
+mod user;
 
-pub use self::{follower::*, user::*};
+pub use self::{article::*, follower::*, user::*};
