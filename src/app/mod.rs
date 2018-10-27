@@ -7,6 +7,7 @@ use actix_web::{
 use config::Config;
 use hub::Hub;
 
+mod articles;
 mod error;
 mod profiles;
 mod res;
@@ -27,6 +28,7 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
                 None => scope,
             };
 
+            // Users
             let scope = scope
                 .resource("users", |r| r.post().with(users::sign_up))
                 .resource("users/login", |r| r.post().with(users::sign_in))
@@ -35,6 +37,7 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
                     r.put().with(users::update_user)
                 });
 
+            // Profiles
             let scope = scope
                 .resource("profiles/{username}", |r| {
                     r.get().with(profiles::get_profile)
@@ -42,6 +45,9 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
                     r.post().with(profiles::follow);
                     r.delete().with(profiles::unfollow)
                 });
+
+            // Articles
+            let scope = scope.resource("articles", |r| r.post().with(articles::create_article));
 
             scope
         })

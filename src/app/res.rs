@@ -49,3 +49,23 @@ impl Profile {
 pub struct ProfileResponse {
     pub profile: Profile,
 }
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Article {
+    pub slug: String,
+    pub title: String,
+    pub description: String,
+    pub body: String,
+    pub tag_list: Vec<String>,
+    pub created_at: String,
+    pub updated_at: String,
+    pub favorited: bool,
+    pub favorites_count: u32,
+    pub author: Profile,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ArticleResponse {
+    pub article: Article,
+}
