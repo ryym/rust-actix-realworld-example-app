@@ -26,6 +26,7 @@ impl<T: AddFollower> CanAddFollower for T {
 }
 
 // TODO: What if the user is already followed?
+// TODO: Should not allow to follow oneself (case of user.id == follower_id)
 fn insert_follower(conn: &db::Connection, user: &User, follower_id: i32) -> Result<()> {
     use schema::followers;
 
