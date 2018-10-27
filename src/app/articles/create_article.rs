@@ -1,7 +1,5 @@
-use rand::{distributions::Alphanumeric, thread_rng, Rng};
-use std::iter;
-
 use super::res;
+use super::slugify::CanSlugify;
 use super::NewArticle;
 use db;
 use hub::Hub;
@@ -14,12 +12,12 @@ pub trait CanCreateArticle {
     fn create_article(&self, author: mdl::User, article: NewArticle) -> Result<res::Article>;
 }
 
-pub trait CreateArticle: db::HaveDb {}
+pub trait CreateArticle: db::HaveDb + CanSlugify {}
 impl<T: CreateArticle> CanCreateArticle for T {
     fn create_article(&self, author: mdl::User, article: NewArticle) -> Result<res::Article> {
         let new_article = mdl::NewArticle {
             author_id: author.id,
-            slug: slug(&article.title),
+            slug: self.slugify(&article.title),
             title: article.title,
             description: article.description,
             body: article.body,
@@ -43,16 +41,6 @@ impl<T: CreateArticle> CanCreateArticle for T {
             author: res::Profile::from_user(author, false),
         })
     }
-}
-
-// TODO: Implement better conversion.
-fn slug(title: &str) -> String {
-    let mut rng = thread_rng();
-    let random: String = iter::repeat(())
-        .map(|_| rng.sample(Alphanumeric))
-        .take(10)
-        .collect();
-    title.replace(" ", "-").to_lowercase() + "-" + &random
 }
 
 fn insert_article(conn: &db::Connection, article: mdl::NewArticle) -> Result<mdl::Article> {

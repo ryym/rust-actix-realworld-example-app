@@ -1,5 +1,6 @@
 mod create_article;
 mod get_article;
+mod slugify;
 
 pub(self) use super::res;
 
