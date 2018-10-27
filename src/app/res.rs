@@ -1,3 +1,6 @@
+use chrono::NaiveDateTime;
+use serde::ser::{Serialize, Serializer};
+
 use mdl;
 
 #[derive(Debug, Serialize)]
@@ -58,8 +61,8 @@ pub struct Article {
     pub description: String,
     pub body: String,
     pub tag_list: Vec<String>,
-    pub created_at: String,
-    pub updated_at: String,
+    pub created_at: DateTimeStr,
+    pub updated_at: DateTimeStr,
     pub favorited: bool,
     pub favorites_count: u32,
     pub author: Profile,
@@ -68,4 +71,15 @@ pub struct Article {
 #[derive(Debug, Serialize)]
 pub struct ArticleResponse {
     pub article: Article,
+}
+
+/// Default serialization of datetime string.
+#[derive(Debug)]
+pub struct DateTimeStr(pub NaiveDateTime);
+
+impl Serialize for DateTimeStr {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let s = self.0.format("%Y-%m-%dT%H:%M:%S.%3fZ");
+        serializer.serialize_str(&s.to_string())
+    }
 }

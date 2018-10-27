@@ -33,8 +33,8 @@ impl<T: CreateArticle> CanCreateArticle for T {
             description: article.description,
             body: article.body,
             tag_list: Vec::new(),
-            created_at: String::new(), // TODO
-            updated_at: String::new(),
+            created_at: res::DateTimeStr(article.created_at),
+            updated_at: res::DateTimeStr(article.updated_at),
             favorited: false,
             favorites_count: 0,
             author: res::Profile::from_user(author, false),
