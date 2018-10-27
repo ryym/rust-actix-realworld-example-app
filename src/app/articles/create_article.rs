@@ -1,3 +1,6 @@
+use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use std::iter;
+
 use super::res;
 use super::NewArticle;
 use db;
@@ -44,7 +47,12 @@ impl<T: CreateArticle> CanCreateArticle for T {
 
 // TODO: Implement better conversion.
 fn slug(title: &str) -> String {
-    title.replace(" ", "-").to_lowercase()
+    let mut rng = thread_rng();
+    let random: String = iter::repeat(())
+        .map(|_| rng.sample(Alphanumeric))
+        .take(10)
+        .collect();
+    title.replace(" ", "-").to_lowercase() + "-" + &random
 }
 
 fn insert_article(conn: &db::Connection, article: mdl::NewArticle) -> Result<mdl::Article> {

@@ -19,6 +19,7 @@ extern crate serde_derive;
 extern crate serde_json;
 extern crate frank_jwt;
 extern crate pbkdf2;
+extern crate rand;
 
 extern crate chrono;
 #[macro_use]
