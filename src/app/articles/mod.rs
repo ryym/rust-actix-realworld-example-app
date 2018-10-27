@@ -1,6 +1,7 @@
 mod create_article;
 mod get_article;
 mod slugify;
+mod update_article;
 
 pub(self) use super::res;
 
@@ -8,6 +9,7 @@ use actix_web::{Json, Path, State};
 
 use self::create_article::CanCreateArticle;
 use self::get_article::CanGetArticle;
+use self::update_article::CanUpdateArticle;
 use super::res::ArticleResponse;
 use auth::Auth;
 use prelude::*;
@@ -24,6 +26,13 @@ pub struct NewArticle {
     description: String,
     body: String,
     tag_list: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ArticleChange {
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub body: Option<String>,
 }
 
 pub fn create_article<S>(
@@ -45,5 +54,16 @@ where
 {
     let user = auth.map(|a| a.user);
     let article = hub.get_article(&slug, user.as_ref())?;
+    Ok(Json(ArticleResponse { article }))
+}
+
+pub fn update_article<S>(
+    (hub, auth, slug, form): (State<S>, Auth, Path<String>, Json<In<ArticleChange>>),
+) -> Result<Json<ArticleResponse>>
+where
+    S: CanUpdateArticle,
+{
+    let change = form.into_inner().article;
+    let article = hub.update_article(&auth.user, &slug, change)?;
     Ok(Json(ArticleResponse { article }))
 }
