@@ -53,6 +53,7 @@ pub struct ProfileResponse {
     pub profile: Profile,
 }
 
+// TODO: Should use builder pattern.
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Article {
@@ -64,7 +65,7 @@ pub struct Article {
     pub created_at: DateTimeStr,
     pub updated_at: DateTimeStr,
     pub favorited: bool,
-    pub favorites_count: u32,
+    pub favorites_count: i64,
     pub author: Profile,
 }
 

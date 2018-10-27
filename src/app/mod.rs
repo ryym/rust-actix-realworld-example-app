@@ -47,7 +47,9 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
                 });
 
             // Articles
-            let scope = scope.resource("articles", |r| r.post().with(articles::create_article));
+            let scope = scope
+                .resource("articles", |r| r.post().with(articles::create_article))
+                .resource("articles/{slug}", |r| r.get().with(articles::get_article));
 
             scope
         })
