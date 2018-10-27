@@ -1,4 +1,5 @@
 mod create_article;
+mod delete_article;
 mod get_article;
 mod slugify;
 mod update_article;
@@ -8,6 +9,7 @@ pub(self) use super::res;
 use actix_web::{Json, Path, State};
 
 use self::create_article::CanCreateArticle;
+use self::delete_article::CanDeleteArticle;
 use self::get_article::CanGetArticle;
 use self::update_article::CanUpdateArticle;
 use super::res::ArticleResponse;
@@ -66,4 +68,12 @@ where
     let change = form.into_inner().article;
     let article = hub.update_article(&auth.user, &slug, change)?;
     Ok(Json(ArticleResponse { article }))
+}
+
+pub fn delete_article<S>((hub, auth, slug): (State<S>, Auth, Path<String>)) -> Result<Json<()>>
+where
+    S: CanDeleteArticle,
+{
+    hub.delete_article(&auth.user, &slug)?;
+    Ok(Json(()))
 }
