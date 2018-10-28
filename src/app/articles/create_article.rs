@@ -25,7 +25,7 @@ impl<T: CreateArticle> CanCreateArticle for T {
 
         let article = self.use_db(|conn| {
             // TODO: register tags.
-            insert_article(conn, new_article).map_err(|e| e.into())
+            insert_article(conn, new_article)
         })?;
 
         Ok(res::Article {
