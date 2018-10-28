@@ -2,6 +2,7 @@ mod build_article_list;
 mod create_article;
 mod delete_article;
 mod favorite_article;
+mod feed_articles;
 mod get_article;
 mod list_articles;
 mod slugify;
@@ -15,6 +16,7 @@ use actix_web::{Json, Path, Query, State};
 use self::create_article::CanCreateArticle;
 use self::delete_article::CanDeleteArticle;
 use self::favorite_article::CanFavoriteArticle;
+use self::feed_articles::{CanFeedArticles, Params as FeedParams};
 use self::get_article::CanGetArticle;
 use self::list_articles::{CanListArticles, Params};
 use self::unfavorite_article::CanUnfavoriteArticle;
@@ -113,5 +115,15 @@ where
 {
     let user = auth.map(|a| a.user);
     let articles = hub.list_articles(params.into_inner(), user.as_ref())?;
+    Ok(Json(ArticleListResponse::new(articles)))
+}
+
+pub fn feed_articles<S>(
+    (hub, auth, params): (State<S>, Auth, Query<FeedParams>),
+) -> Result<Json<ArticleListResponse>>
+where
+    S: CanFeedArticles,
+{
+    let articles = hub.feed_articles(&auth.user, params.into_inner())?;
     Ok(Json(ArticleListResponse::new(articles)))
 }
