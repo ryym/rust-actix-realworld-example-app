@@ -1,5 +1,3 @@
-use diesel;
-
 use super::password::CanHashPassword;
 use crate::db::{self, HaveDb};
 use crate::hub::Hub;

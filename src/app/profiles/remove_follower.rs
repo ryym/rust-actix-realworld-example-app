@@ -1,5 +1,3 @@
-use diesel;
-
 use super::{find_user, Profile};
 use crate::db;
 use crate::hub::Hub;
