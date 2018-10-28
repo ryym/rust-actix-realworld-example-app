@@ -1,7 +1,9 @@
 mod create_article;
 mod delete_article;
+mod favorite_article;
 mod get_article;
 mod slugify;
+mod unfavorite_article;
 mod update_article;
 
 pub(self) use super::res;
@@ -10,7 +12,9 @@ use actix_web::{Json, Path, State};
 
 use self::create_article::CanCreateArticle;
 use self::delete_article::CanDeleteArticle;
+use self::favorite_article::CanFavoriteArticle;
 use self::get_article::CanGetArticle;
+use self::unfavorite_article::CanUnfavoriteArticle;
 use self::update_article::CanUpdateArticle;
 use super::res::ArticleResponse;
 use auth::Auth;
@@ -76,4 +80,24 @@ where
 {
     hub.delete_article(&auth.user, &slug)?;
     Ok(Json(()))
+}
+
+pub fn favorite_article<S>(
+    (hub, auth, slug): (State<S>, Auth, Path<String>),
+) -> Result<Json<ArticleResponse>>
+where
+    S: CanFavoriteArticle,
+{
+    let article = hub.favorite_article(&auth.user, &slug)?;
+    Ok(Json(ArticleResponse { article }))
+}
+
+pub fn unfavorite_article<S>(
+    (hub, auth, slug): (State<S>, Auth, Path<String>),
+) -> Result<Json<ArticleResponse>>
+where
+    S: CanUnfavoriteArticle,
+{
+    let article = hub.unfavorite_article(&auth.user, &slug)?;
+    Ok(Json(ArticleResponse { article }))
 }

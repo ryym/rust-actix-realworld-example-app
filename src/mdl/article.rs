@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 
-use schema::articles;
+use schema::{articles, favorite_articles};
 
 #[derive(Debug, Queryable)]
 pub struct Article {
@@ -33,4 +33,11 @@ pub struct ArticleChange {
     pub title: Option<String>,
     pub description: Option<String>,
     pub body: Option<String>,
+}
+
+#[derive(Debug, Insertable)]
+#[table_name = "favorite_articles"]
+pub struct NewFavoriteArticle {
+    pub user_id: i32,
+    pub article_id: i32,
 }
