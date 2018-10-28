@@ -74,6 +74,22 @@ pub struct ArticleResponse {
     pub article: Article,
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ArticleListResponse {
+    pub articles: Vec<Article>,
+    pub articles_count: u32,
+}
+
+impl ArticleListResponse {
+    pub fn new(articles: Vec<Article>) -> ArticleListResponse {
+        Self {
+            articles_count: articles.len() as u32,
+            articles,
+        }
+    }
+}
+
 /// Default serialization of datetime string.
 #[derive(Debug)]
 pub struct DateTimeStr(pub NaiveDateTime);

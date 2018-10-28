@@ -48,8 +48,10 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
 
             // Articles
             let scope = scope
-                .resource("articles", |r| r.post().with(articles::create_article))
-                .resource("articles/{slug}", |r| {
+                .resource("articles", |r| {
+                    r.get().with(articles::list_articles);
+                    r.post().with(articles::create_article)
+                }).resource("articles/{slug}", |r| {
                     r.get().with(articles::get_article);
                     r.put().with(articles::update_article);
                     r.delete().with(articles::delete_article)

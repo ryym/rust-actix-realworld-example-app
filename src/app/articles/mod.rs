@@ -1,22 +1,25 @@
+mod build_article_list;
 mod create_article;
 mod delete_article;
 mod favorite_article;
 mod get_article;
+mod list_articles;
 mod slugify;
 mod unfavorite_article;
 mod update_article;
 
 pub(self) use super::res;
 
-use actix_web::{Json, Path, State};
+use actix_web::{Json, Path, Query, State};
 
 use self::create_article::CanCreateArticle;
 use self::delete_article::CanDeleteArticle;
 use self::favorite_article::CanFavoriteArticle;
 use self::get_article::CanGetArticle;
+use self::list_articles::{CanListArticles, Params};
 use self::unfavorite_article::CanUnfavoriteArticle;
 use self::update_article::CanUpdateArticle;
-use super::res::ArticleResponse;
+use super::res::{ArticleListResponse, ArticleResponse};
 use auth::Auth;
 use prelude::*;
 
@@ -100,4 +103,15 @@ where
 {
     let article = hub.unfavorite_article(&auth.user, &slug)?;
     Ok(Json(ArticleResponse { article }))
+}
+
+pub fn list_articles<S>(
+    (hub, auth, params): (State<S>, Option<Auth>, Query<Params>),
+) -> Result<Json<ArticleListResponse>>
+where
+    S: CanListArticles,
+{
+    let user = auth.map(|a| a.user);
+    let articles = hub.list_articles(params.into_inner(), user.as_ref())?;
+    Ok(Json(ArticleListResponse::new(articles)))
 }
