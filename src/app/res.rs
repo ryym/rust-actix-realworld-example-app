@@ -1,7 +1,7 @@
 use chrono::NaiveDateTime;
 use serde::ser::{Serialize, Serializer};
 
-use mdl;
+use crate::mdl;
 
 #[derive(Debug, Serialize)]
 pub struct User {

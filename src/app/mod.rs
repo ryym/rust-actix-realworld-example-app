@@ -4,8 +4,8 @@ use actix_web::{
     App, HttpRequest,
 };
 
-use config::Config;
-use hub::Hub;
+use crate::config::Config;
+use crate::hub::Hub;
 
 mod articles;
 mod error;

@@ -1,15 +1,15 @@
-use db;
-use hub::Hub;
-use mdl::User;
-use prelude::*;
+use crate::db;
+use crate::hub::Hub;
+use crate::mdl::User;
+use crate::prelude::*;
 
 impl CanDeleteArticle for Hub {}
 
 pub trait CanDeleteArticle: db::HaveDb {
     fn delete_article(&self, user: &User, slug: &str) -> Result<()> {
         self.use_db(|conn| {
+            use crate::schema::articles;
             use diesel::{self, prelude::*};
-            use schema::articles;
 
             let (id, author_id) = articles::table
                 .filter(articles::slug.eq(slug))

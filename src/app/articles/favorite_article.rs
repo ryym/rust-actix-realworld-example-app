@@ -1,17 +1,17 @@
 use super::get_article::CanGetArticle;
 use super::res;
-use db;
-use hub::Hub;
-use mdl::{Article, NewFavoriteArticle, User};
-use prelude::*;
+use crate::db;
+use crate::hub::Hub;
+use crate::mdl::{Article, NewFavoriteArticle, User};
+use crate::prelude::*;
 
 impl CanFavoriteArticle for Hub {}
 
 pub trait CanFavoriteArticle: db::HaveDb + CanGetArticle {
     fn favorite_article(&self, user: &User, slug: &str) -> Result<res::Article> {
         let article = self.use_db(|conn| {
+            use crate::schema::{articles, favorite_articles as fav_articles};
             use diesel::{self, prelude::*};
-            use schema::{articles, favorite_articles as fav_articles};
 
             let article = articles::table
                 .filter(articles::slug.eq(slug))

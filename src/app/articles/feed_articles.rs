@@ -3,10 +3,10 @@ use std::cmp;
 
 use super::build_article_list::CanBuildArticleList;
 use super::res;
-use db;
-use hub::Hub;
-use mdl::{Article, User};
-use prelude::*;
+use crate::db;
+use crate::hub::Hub;
+use crate::mdl::{Article, User};
+use crate::prelude::*;
 
 #[derive(Debug, Deserialize)]
 pub struct Params {
@@ -27,7 +27,7 @@ pub trait CanFeedArticles: db::HaveDb + CanBuildArticleList {
 }
 
 fn select_followed_authors(conn: &db::Connection, user_id: i32) -> Result<Vec<i32>> {
-    use schema::followers as flws;
+    use crate::schema::followers as flws;
 
     let ids = flws::table
         .filter(flws::follower_id.eq(user_id))
@@ -41,7 +41,7 @@ fn select_articles(
     author_ids: &[i32],
     p: Params,
 ) -> Result<Vec<(Article, User)>> {
-    use schema::{articles, users};
+    use crate::schema::{articles, users};
 
     let limit = cmp::min(p.limit.unwrap_or(20), 500) as i64;
     let offset = cmp::min(p.offset.unwrap_or(0), 500) as i64;

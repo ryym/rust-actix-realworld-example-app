@@ -1,10 +1,10 @@
 use diesel::{self, prelude::*};
 
 use super::{find_user, Profile};
-use db;
-use hub::Hub;
-use mdl::{NewFollower, User};
-use prelude::*;
+use crate::db;
+use crate::hub::Hub;
+use crate::mdl::{NewFollower, User};
+use crate::prelude::*;
 
 impl AddFollower for Hub {}
 
@@ -28,7 +28,7 @@ impl<T: AddFollower> CanAddFollower for T {
 // TODO: What if the user is already followed?
 // TODO: Should not allow to follow oneself (case of user.id == follower_id)
 fn insert_follower(conn: &db::Connection, user: &User, follower_id: i32) -> Result<()> {
-    use schema::followers;
+    use crate::schema::followers;
 
     diesel::insert_into(followers::table)
         .values(&NewFollower {

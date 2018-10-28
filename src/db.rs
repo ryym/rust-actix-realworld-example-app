@@ -4,7 +4,7 @@ use diesel::{
     result::Error as DieselError,
 };
 
-use prelude::*;
+use crate::prelude::*;
 
 pub type Connection = diesel::pg::PgConnection;
 pub type Pool = r2d2::Pool<ConnectionManager<Connection>>;

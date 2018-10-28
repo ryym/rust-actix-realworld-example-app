@@ -2,10 +2,10 @@ use super::get_article::CanGetArticle;
 use super::res;
 use super::slugify::CanSlugify;
 use super::ArticleChange;
-use db;
-use hub::Hub;
-use mdl::{self, Article, User};
-use prelude::*;
+use crate::db;
+use crate::hub::Hub;
+use crate::mdl::{self, Article, User};
+use crate::prelude::*;
 
 impl CanUpdateArticle for Hub {}
 
@@ -17,8 +17,8 @@ pub trait CanUpdateArticle: db::HaveDb + CanSlugify + CanGetArticle {
         change: ArticleChange,
     ) -> Result<res::Article> {
         let article = self.use_db(|conn| {
+            use crate::schema::articles;
             use diesel::{self, prelude::*};
-            use schema::articles;
 
             let article = articles::table
                 .filter(articles::slug.eq(slug))

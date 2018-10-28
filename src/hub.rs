@@ -1,7 +1,6 @@
-use config::{Config, HaveConfig};
-use db::{self, Connection, HaveDb, Pool};
-
-use prelude::*;
+use crate::config::{Config, HaveConfig};
+use crate::db::{self, Connection, HaveDb, Pool};
+use crate::prelude::*;
 
 pub struct Hub {
     config: Config,

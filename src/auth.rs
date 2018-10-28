@@ -1,12 +1,12 @@
 use actix_web::{http::header::AUTHORIZATION, FromRequest, HttpRequest};
 use serde::de::DeserializeOwned;
 
-use db::HaveDb;
-use error::JwtError;
-use hub::Hub;
-use jwt::{CanDecodeJwt, Decoded, Payload};
-use mdl::User;
-use prelude::*;
+use crate::db::HaveDb;
+use crate::error::JwtError;
+use crate::hub::Hub;
+use crate::jwt::{CanDecodeJwt, Decoded, Payload};
+use crate::mdl::User;
+use crate::prelude::*;
 
 const TOKEN_PREFIX: &str = "Token ";
 
@@ -50,8 +50,8 @@ impl<T: Authenticate> CanAuthenticate for T {
         let payload = self.decode_auth_token::<Payload>(&token)?;
 
         let user = self.use_db(|conn| {
+            use crate::schema::users::dsl::*;
             use diesel::prelude::*;
-            use schema::users::dsl::*;
 
             let user = users
                 .find(payload.id)

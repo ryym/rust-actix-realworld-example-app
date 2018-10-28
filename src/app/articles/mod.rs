@@ -22,8 +22,8 @@ use self::list_articles::{CanListArticles, Params};
 use self::unfavorite_article::CanUnfavoriteArticle;
 use self::update_article::CanUpdateArticle;
 use super::res::{ArticleListResponse, ArticleResponse};
-use auth::Auth;
-use prelude::*;
+use crate::auth::Auth;
+use crate::prelude::*;
 
 #[derive(Debug, Deserialize)]
 pub struct In<T> {

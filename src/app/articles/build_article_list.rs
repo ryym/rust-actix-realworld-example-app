@@ -2,10 +2,10 @@ use diesel::prelude::*;
 use std::collections::{HashMap, HashSet};
 
 use super::res;
-use db;
-use hub::Hub;
-use mdl::{Article, User};
-use prelude::*;
+use crate::db;
+use crate::hub::Hub;
+use crate::mdl::{Article, User};
+use crate::prelude::*;
 
 impl CanBuildArticleList for Hub {}
 
@@ -63,7 +63,7 @@ fn select_favorites(
     user_id: i32,
     article_ids: &[i32],
 ) -> Result<HashSet<i32>> {
-    use schema::favorite_articles as favs;
+    use crate::schema::favorite_articles as favs;
 
     let ids = favs::table
         .filter(favs::user_id.eq(user_id))
@@ -79,7 +79,7 @@ fn select_followings(
     user_id: i32,
     author_ids: &[i32],
 ) -> Result<HashSet<i32>> {
-    use schema::followers as flws;
+    use crate::schema::followers as flws;
 
     let ids = flws::table
         .filter(flws::user_id.eq_any(author_ids))
@@ -91,8 +91,8 @@ fn select_followings(
 }
 
 fn select_favorite_counts(conn: &db::Connection, article_ids: &[i32]) -> Result<HashMap<i32, i64>> {
+    use crate::schema::favorite_articles as favs;
     use diesel::{dsl::sql, sql_types::BigInt};
-    use schema::favorite_articles as favs;
 
     // Unfortunately, currently diesel does not support `GROUP BY`.
     // https://github.com/diesel-rs/diesel/issues/210

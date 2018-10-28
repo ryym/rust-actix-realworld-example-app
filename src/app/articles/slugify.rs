@@ -1,7 +1,7 @@
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use std::iter;
 
-use hub::Hub;
+use crate::hub::Hub;
 
 impl CanSlugify for Hub {}
 

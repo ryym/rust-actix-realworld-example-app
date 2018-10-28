@@ -1,10 +1,10 @@
 use diesel::prelude::*;
 
 use super::{find_user, Profile};
-use db;
-use hub::Hub;
-use mdl::User;
-use prelude::*;
+use crate::db;
+use crate::hub::Hub;
+use crate::mdl::User;
+use crate::prelude::*;
 
 impl FindProfile for Hub {}
 
@@ -30,7 +30,7 @@ impl<T: FindProfile> CanFindProfile for T {
 }
 
 fn is_follower(conn: &db::Connection, user_id: i32, follower_id: i32) -> Result<bool> {
-    use schema::followers as fl;
+    use crate::schema::followers as fl;
 
     let id = fl::table
         .filter(fl::user_id.eq(user_id))

@@ -1,8 +1,8 @@
 use super::{password::CanCheckPassword, SigninUser};
-use db::HaveDb;
-use hub::Hub;
-use mdl::{Credential, User};
-use prelude::*;
+use crate::db::HaveDb;
+use crate::hub::Hub;
+use crate::mdl::{Credential, User};
+use crate::prelude::*;
 
 impl Authenticate for Hub {}
 
@@ -14,8 +14,8 @@ pub trait Authenticate: HaveDb + CanCheckPassword {}
 impl<T: Authenticate> CanAuthenticate for T {
     fn authenticate(&self, form: &SigninUser) -> Result<User> {
         let user_cred = self.use_db(|conn| {
+            use crate::schema::{credentials::dsl::*, users::dsl::*};
             use diesel::prelude::*;
-            use schema::{credentials::dsl::*, users::dsl::*};
 
             let data = users
                 .inner_join(credentials)

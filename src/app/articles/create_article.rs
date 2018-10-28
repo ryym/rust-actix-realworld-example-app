@@ -1,10 +1,10 @@
 use super::res;
 use super::slugify::CanSlugify;
 use super::NewArticle;
-use db;
-use hub::Hub;
-use mdl;
-use prelude::*;
+use crate::db;
+use crate::hub::Hub;
+use crate::mdl;
+use crate::prelude::*;
 
 impl CreateArticle for Hub {}
 
@@ -44,8 +44,8 @@ impl<T: CreateArticle> CanCreateArticle for T {
 }
 
 fn insert_article(conn: &db::Connection, article: mdl::NewArticle) -> Result<mdl::Article> {
+    use crate::schema::articles;
     use diesel::{self, prelude::*};
-    use schema::articles;
 
     let article = diesel::insert_into(articles::table)
         .values(&article)

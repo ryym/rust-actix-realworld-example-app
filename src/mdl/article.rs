@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 
-use schema::{articles, favorite_articles};
+use crate::schema::{articles, favorite_articles};
 
 #[derive(Debug, Queryable)]
 pub struct Article {

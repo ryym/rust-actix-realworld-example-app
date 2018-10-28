@@ -1,7 +1,7 @@
 use pbkdf2::{pbkdf2_check, pbkdf2_simple};
 
-use hub::Hub;
-use prelude::*;
+use crate::hub::Hub;
+use crate::prelude::*;
 
 impl CanHashPassword for Hub {}
 impl CanCheckPassword for Hub {}

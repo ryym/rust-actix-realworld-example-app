@@ -3,7 +3,7 @@ use actix_web::{
     ResponseError,
 };
 
-use prelude::*;
+use crate::prelude::*;
 
 #[derive(Debug, Serialize)]
 struct ErrorData {

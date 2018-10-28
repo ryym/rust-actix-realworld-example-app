@@ -2,9 +2,9 @@ use frank_jwt as jwt;
 use serde::de::DeserializeOwned;
 use serde_json;
 
-use config::HaveConfig;
-use hub::Hub;
-use prelude::*;
+use crate::config::HaveConfig;
+use crate::hub::Hub;
+use crate::prelude::*;
 
 impl GenerateJwt for Hub {}
 impl DecodeJwt for Hub {}

@@ -8,14 +8,14 @@ use self::add_follower::CanAddFollower;
 use self::find_profile::CanFindProfile;
 use self::remove_follower::CanRemoveFollower;
 use super::res::{Profile, ProfileResponse};
-use auth::Auth;
-use db;
-use mdl::User;
-use prelude::*;
+use crate::auth::Auth;
+use crate::db;
+use crate::mdl::User;
+use crate::prelude::*;
 
 fn find_user(conn: &db::Connection, username: &str) -> Result<User> {
+    use crate::schema::users as u;
     use diesel::prelude::*;
-    use schema::users as u;
 
     let user = u::table.filter(u::username.eq(username)).first(conn)?;
     Ok(user)

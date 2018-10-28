@@ -13,10 +13,10 @@ use self::{
     validate_signup::CanValidateSignup,
 };
 use super::res::{User, UserResponse};
-use auth::Auth;
-use jwt::CanGenerateJwt;
-use mdl;
-use prelude::*;
+use crate::auth::Auth;
+use crate::jwt::CanGenerateJwt;
+use crate::mdl;
+use crate::prelude::*;
 
 #[derive(Debug, Deserialize)]
 pub struct In<U> {

@@ -1,10 +1,10 @@
 use diesel;
 
 use super::password::CanHashPassword;
-use db::{self, HaveDb};
-use hub::Hub;
-use mdl::{CredentialChange, User, UserChange};
-use prelude::*;
+use crate::db::{self, HaveDb};
+use crate::hub::Hub;
+use crate::mdl::{CredentialChange, User, UserChange};
+use crate::prelude::*;
 
 impl UpdateUser for Hub {}
 
@@ -36,11 +36,11 @@ impl<T: UpdateUser> CanUpdateUser for T {
         };
 
         self.use_db(|conn| {
-            use diesel::prelude::*;
-            use schema::{
+            use crate::schema::{
                 credentials::dsl::*,
                 users::{self, dsl::*},
             };
+            use diesel::prelude::*;
 
             conn.transaction(|| {
                 db::may_update(

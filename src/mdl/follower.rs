@@ -1,4 +1,4 @@
-use schema::followers;
+use crate::schema::followers;
 
 #[derive(Debug, Insertable)]
 #[table_name = "followers"]

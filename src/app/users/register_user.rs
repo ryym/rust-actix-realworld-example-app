@@ -2,10 +2,10 @@ use diesel::{self, prelude::*};
 
 use super::password::CanHashPassword;
 use super::SignupUser;
-use db::{self, HaveDb};
-use hub::Hub;
-use mdl::{NewCredential, NewUser, User};
-use prelude::*;
+use crate::db::{self, HaveDb};
+use crate::hub::Hub;
+use crate::mdl::{NewCredential, NewUser, User};
+use crate::prelude::*;
 
 impl RegisterUser for Hub {}
 
@@ -30,7 +30,7 @@ impl<T: RegisterUser> CanRegisterUser for T {
 }
 
 fn insert_user(conn: &db::Connection, form: &SignupUser) -> Result<User> {
-    use schema::users::dsl::*;
+    use crate::schema::users::dsl::*;
 
     let new_user = NewUser {
         username: form.username.clone(),
@@ -46,7 +46,7 @@ fn insert_user(conn: &db::Connection, form: &SignupUser) -> Result<User> {
 }
 
 fn insert_credential(conn: &db::Connection, user_id: i32, password_hash: String) -> Result<()> {
-    use schema::credentials;
+    use crate::schema::credentials;
 
     let new_cred = NewCredential {
         user_id,

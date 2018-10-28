@@ -1,9 +1,9 @@
 use diesel;
 
 use super::{find_user, Profile};
-use db;
-use hub::Hub;
-use prelude::*;
+use crate::db;
+use crate::hub::Hub;
+use crate::prelude::*;
 
 impl RemoveFollower for Hub {}
 
@@ -25,8 +25,8 @@ impl<T: RemoveFollower> CanRemoveFollower for T {
 }
 
 fn delete_follower(conn: &db::Connection, user_id: i32, follower_id: i32) -> Result<()> {
+    use crate::schema::followers as fl;
     use diesel::prelude::*;
-    use schema::followers as fl;
 
     diesel::delete(
         fl::table

@@ -3,10 +3,10 @@ use std::cmp;
 
 use super::build_article_list::CanBuildArticleList;
 use super::res;
-use db;
-use hub::Hub;
-use mdl::{Article, User};
-use prelude::*;
+use crate::db;
+use crate::hub::Hub;
+use crate::mdl::{Article, User};
+use crate::prelude::*;
 
 impl CanListArticles for Hub {}
 
@@ -30,7 +30,7 @@ pub trait CanListArticles: db::HaveDb + CanBuildArticleList {
 }
 
 fn search_articles(conn: &db::Connection, p: Params) -> Result<Vec<(Article, User)>> {
-    use schema::{articles::dsl::*, users};
+    use crate::schema::{articles::dsl::*, users};
 
     let mut q = articles.inner_join(users::table).into_boxed();
 
@@ -39,7 +39,7 @@ fn search_articles(conn: &db::Connection, p: Params) -> Result<Vec<(Article, Use
     }
 
     if let Some(ref liker_name) = p.favorited {
-        use schema::favorite_articles as favs;
+        use crate::schema::favorite_articles as favs;
 
         let favorited_ids = favs::table
             .inner_join(users::table)

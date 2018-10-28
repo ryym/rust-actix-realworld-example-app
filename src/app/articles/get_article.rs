@@ -1,16 +1,16 @@
 use super::res;
-use db;
-use hub::Hub;
-use mdl::{Article, User};
-use prelude::*;
+use crate::db;
+use crate::hub::Hub;
+use crate::mdl::{Article, User};
+use crate::prelude::*;
 
 impl CanGetArticle for Hub {}
 
 pub trait CanGetArticle: db::HaveDb {
     fn get_article(&self, slug: &str, current: Option<&User>) -> Result<res::Article> {
         self.use_db(|conn| {
+            use crate::schema::{articles, favorite_articles as fav_articles, users as authors};
             use diesel::prelude::*;
-            use schema::{articles, favorite_articles as fav_articles, users as authors};
 
             let (article, author) = articles::table
                 .inner_join(authors::table)
@@ -49,8 +49,8 @@ fn find_favorite_and_following(
     author_id: i32,
     user: &User,
 ) -> Result<(bool, bool)> {
+    use crate::schema::{favorite_articles as fav_articles, followers, users};
     use diesel::prelude::*;
-    use schema::{favorite_articles as fav_articles, followers, users};
 
     let (_, fav_id, follow_id) = users::table
         .left_join(

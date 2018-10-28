@@ -1,9 +1,9 @@
 use diesel::prelude::*;
 
 use super::SignupUser;
-use db::HaveDb;
-use hub::Hub;
-use prelude::*;
+use crate::db::HaveDb;
+use crate::hub::Hub;
+use crate::prelude::*;
 
 impl ValidateSignup for Hub {}
 
@@ -29,8 +29,8 @@ impl<T: ValidateSignup> CanValidateSignup for T {
     // or find a crate to avoid manual if-else validation.
     // TODO: Implement all validations.
     fn validate_signup(&self, form: &SignupUser) -> Result<()> {
+        use crate::schema::users::dsl::*;
         use diesel::dsl::{exists, select};
-        use schema::users::dsl::*;
 
         let mut errs = Vec::new();
 
