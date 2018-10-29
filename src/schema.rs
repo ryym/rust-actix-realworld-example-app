@@ -12,6 +12,17 @@ table! {
 }
 
 table! {
+    comments (id) {
+        id -> Int4,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+        article_id -> Int4,
+        user_id -> Int4,
+        body -> Varchar,
+    }
+}
+
+table! {
     credentials (id) {
         id -> Int4,
         user_id -> Int4,
@@ -54,12 +65,15 @@ table! {
 }
 
 joinable!(articles -> users (author_id));
+joinable!(comments -> articles (article_id));
+joinable!(comments -> users (user_id));
 joinable!(credentials -> users (user_id));
 joinable!(favorite_articles -> articles (article_id));
 joinable!(favorite_articles -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
     articles,
+    comments,
     credentials,
     favorite_articles,
     followers,
