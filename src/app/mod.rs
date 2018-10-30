@@ -59,6 +59,8 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
                 }).resource("articles/{slug}/favorite", |r| {
                     r.post().with(articles::favorite_article);
                     r.delete().with(articles::unfavorite_article);
+                }).resource("articles/{slug}/comments", |r| {
+                    r.post().with(articles::comments::add)
                 });
 
             scope

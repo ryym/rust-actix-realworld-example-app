@@ -90,6 +90,33 @@ impl ArticleListResponse {
     }
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Comment {
+    id: i32,
+    created_at: DateTimeStr,
+    updated_at: DateTimeStr,
+    body: String,
+    author: Profile,
+}
+
+impl Comment {
+    pub fn new(comment: mdl::Comment, author: Profile) -> Comment {
+        Comment {
+            id: comment.id,
+            created_at: DateTimeStr(comment.created_at),
+            updated_at: DateTimeStr(comment.updated_at),
+            body: comment.body,
+            author,
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+pub struct CommentResponse {
+    pub comment: Comment,
+}
+
 /// Default serialization of datetime string.
 #[derive(Debug)]
 pub struct DateTimeStr(pub NaiveDateTime);

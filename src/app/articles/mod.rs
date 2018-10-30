@@ -1,3 +1,5 @@
+pub mod comments;
+
 mod build_article_list;
 mod create_article;
 mod delete_article;
