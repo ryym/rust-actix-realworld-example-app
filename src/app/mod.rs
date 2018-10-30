@@ -60,6 +60,7 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
                     r.post().with(articles::favorite_article);
                     r.delete().with(articles::unfavorite_article);
                 }).resource("articles/{slug}/comments", |r| {
+                    r.get().with(articles::comments::list);
                     r.post().with(articles::comments::add)
                 }).resource("articles/{slug}/comments/{id}", |r| {
                     r.delete().with(articles::comments::delete)

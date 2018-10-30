@@ -1,11 +1,13 @@
 mod add;
 mod delete;
+mod list;
 
 use actix_web::{Json, Path, State};
 
 use self::add::CanAddComment;
 use self::delete::CanDeleteComment;
-use crate::app::res::CommentResponse;
+use self::list::CanListComments;
+use crate::app::res::{CommentListResponse, CommentResponse};
 use crate::auth::Auth;
 use crate::prelude::*;
 
@@ -38,4 +40,15 @@ where
     let comment_id = path.1;
     hub.delete_comment(slug, &auth.user, comment_id)?;
     Ok(Json(()))
+}
+
+pub fn list<S>(
+    (hub, auth, slug): (State<S>, Option<Auth>, Path<String>),
+) -> Result<Json<CommentListResponse>>
+where
+    S: CanListComments,
+{
+    let user = auth.map(|a| a.user);
+    let comments = hub.list_comments(&slug, user.as_ref())?;
+    Ok(Json(CommentListResponse { comments }))
 }
