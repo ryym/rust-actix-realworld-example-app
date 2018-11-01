@@ -1,3 +1,4 @@
+use chrono::{Duration, Utc};
 use jsonwebtoken::{self as jwt, errors as jwt_errors};
 use serde::de::DeserializeOwned;
 
@@ -11,6 +12,7 @@ impl DecodeJwt for Hub {}
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Payload {
     pub id: i32,
+    pub exp: i64,
 }
 
 pub trait CanGenerateJwt {
@@ -20,8 +22,8 @@ pub trait CanGenerateJwt {
 pub trait GenerateJwt: HaveConfig {}
 impl<T: GenerateJwt> CanGenerateJwt for T {
     fn generate_jwt(&self, user_id: i32) -> Result<String> {
-        // TODO: Add expiration.
-        let payload = Payload { id: user_id };
+        let exp = (Utc::now() + Duration::days(21)).timestamp();
+        let payload = Payload { id: user_id, exp };
 
         // The default algorithm is HS256.
         let header = jwt::Header::default();
