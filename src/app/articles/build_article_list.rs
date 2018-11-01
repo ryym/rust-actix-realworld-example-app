@@ -16,12 +16,8 @@ pub trait CanBuildArticleList {
         articles: Vec<(Article, User)>,
         user: Option<&User>,
     ) -> Result<Vec<res::Article>> {
-        let mut article_ids = Vec::with_capacity(articles.len());
-        let mut author_ids = Vec::with_capacity(articles.len());
-        for (ref article, ref author) in articles.iter() {
-            article_ids.push(article.id);
-            author_ids.push(author.id);
-        }
+        let (article_ids, author_ids): (Vec<_>, Vec<_>) =
+            articles.iter().map(|(a, u)| (a.id, u.id)).unzip();
 
         let (favorites, followings, fav_counts) = match user {
             Some(user) => (
