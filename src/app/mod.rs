@@ -11,6 +11,7 @@ mod articles;
 mod error;
 mod profiles;
 mod res;
+mod tags;
 mod users;
 
 fn index(_req: &HttpRequest<Hub>) -> &'static str {
@@ -65,6 +66,9 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
                 }).resource("articles/{slug}/comments/{id}", |r| {
                     r.delete().with(articles::comments::delete)
                 });
+
+            // Tags
+            let scope = scope.resource("tags", |r| r.get().with(tags::list));
 
             scope
         })
