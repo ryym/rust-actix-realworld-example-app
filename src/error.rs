@@ -10,13 +10,13 @@ pub struct Error {
     inner: Context<ErrorKind>,
 }
 
-#[derive(Clone, Debug, Fail)]
+#[derive(Debug, Clone, Fail)]
 pub enum ErrorKind {
     #[fail(display = "validation failure")]
     Validation(Vec<String>),
 
-    #[fail(display = "authentication failure")]
-    Auth,
+    #[fail(display = "authentication failure: {}", _0)]
+    Auth(ErrorKindAuth),
 
     #[fail(display = "database operation failure")]
     Db,
@@ -26,6 +26,26 @@ pub enum ErrorKind {
 
     #[fail(display = "{}", _0)]
     Misc(String),
+}
+
+#[derive(Debug, Clone)]
+pub enum ErrorKindAuth {
+    NoAuthToken,
+    InvalidToken,
+    InvalidUser,
+    Forbidden,
+}
+
+impl Display for ErrorKindAuth {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = match self {
+            ErrorKindAuth::NoAuthToken => "no auth token",
+            ErrorKindAuth::InvalidToken => "invalid token",
+            ErrorKindAuth::InvalidUser => "invalid user",
+            ErrorKindAuth::Forbidden => "forbidden",
+        };
+        write!(f, "{}", s)
+    }
 }
 
 impl Fail for Error {
@@ -58,9 +78,25 @@ impl From<ErrorKind> for Error {
     }
 }
 
+impl From<ErrorKindAuth> for Error {
+    fn from(kind: ErrorKindAuth) -> Error {
+        Error {
+            inner: Context::new(ErrorKind::Auth(kind)),
+        }
+    }
+}
+
 impl From<Context<ErrorKind>> for Error {
     fn from(inner: Context<ErrorKind>) -> Error {
         Error { inner }
+    }
+}
+
+impl From<Context<ErrorKindAuth>> for Error {
+    fn from(ctx: Context<ErrorKindAuth>) -> Error {
+        Error {
+            inner: ctx.map(|k| ErrorKind::Auth(k)),
+        }
     }
 }
 

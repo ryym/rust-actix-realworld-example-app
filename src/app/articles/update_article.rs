@@ -4,6 +4,7 @@ use super::res;
 use super::slugify::CanSlugify;
 use super::ArticleChange;
 use crate::db;
+use crate::error::ErrorKindAuth;
 use crate::hub::Hub;
 use crate::mdl::{self, Article, User};
 use crate::prelude::*;
@@ -26,7 +27,7 @@ pub trait CanUpdateArticle: db::HaveDb + CanSlugify + CanGetArticle + CanReplace
                 .get_result::<Article>(conn)?;
 
             if article.author_id != user.id {
-                return Err(ErrorKind::Auth.into());
+                return Err(ErrorKindAuth::Forbidden.into());
             }
 
             let tag_list = change.tag_list.unwrap_or(Vec::with_capacity(0));

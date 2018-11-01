@@ -3,6 +3,7 @@ use actix_web::{
     ResponseError,
 };
 
+use crate::error::ErrorKindAuth;
 use crate::prelude::*;
 
 #[derive(Debug, Serialize)]
@@ -26,8 +27,11 @@ impl ResponseError for Error {
                     body: msgs.to_vec(),
                 },
             ),
-            ErrorKind::Auth => error_res(
-                StatusCode::UNAUTHORIZED,
+            ErrorKind::Auth(kind) => error_res(
+                match kind {
+                    ErrorKindAuth::Forbidden => StatusCode::FORBIDDEN,
+                    _ => StatusCode::UNAUTHORIZED,
+                },
                 ErrorData {
                     body: vec![self.to_string()],
                 },

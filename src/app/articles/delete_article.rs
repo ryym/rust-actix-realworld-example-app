@@ -1,4 +1,5 @@
 use crate::db;
+use crate::error::ErrorKindAuth;
 use crate::hub::Hub;
 use crate::mdl::User;
 use crate::prelude::*;
@@ -17,7 +18,7 @@ pub trait CanDeleteArticle: db::HaveDb {
                 .get_result::<(i32, i32)>(conn)?;
 
             if author_id != user.id {
-                return Err(ErrorKind::Auth.into());
+                return Err(ErrorKindAuth::Forbidden.into());
             }
 
             diesel::delete(articles::table.filter(articles::id.eq(id))).execute(conn)?;

@@ -1,6 +1,7 @@
 use actix_web::{http::header::AUTHORIZATION, FromRequest, HttpRequest};
 
 use crate::db::HaveDb;
+use crate::error::ErrorKindAuth;
 use crate::hub::Hub;
 use crate::jwt::{CanDecodeJwt, Decoded, Payload};
 use crate::mdl::User;
@@ -18,7 +19,7 @@ pub trait Authenticate: CanDecodeJwt + HaveDb {}
 impl<T: Authenticate> CanAuthenticate for T {
     fn authenticate<S>(&self, req: &HttpRequest<S>) -> Result<Auth> {
         let token = match req.headers().get(AUTHORIZATION) {
-            None => return Err(ErrorKind::Auth.into()),
+            None => return Err(ErrorKindAuth::NoAuthToken.into()),
             Some(token) => token
                 .to_str()
                 .context("read authorization header")?
@@ -26,13 +27,13 @@ impl<T: Authenticate> CanAuthenticate for T {
         };
 
         if !token.starts_with(TOKEN_PREFIX) {
-            return Err(ErrorKind::Auth.into());
+            return Err(ErrorKindAuth::InvalidToken.into());
         }
         let token = token.replacen(TOKEN_PREFIX, "", 1);
 
         let payload: Payload = match self.decode_jwt(&token)? {
             Decoded::Ok(payload) => payload,
-            Decoded::Invalid(err) => return Err(err.context(ErrorKind::Auth).into()),
+            Decoded::Invalid(err) => return Err(err.context(ErrorKindAuth::InvalidToken).into()),
         };
 
         let user = self.use_db(|conn| {
@@ -42,7 +43,7 @@ impl<T: Authenticate> CanAuthenticate for T {
             let user = users
                 .find(payload.id)
                 .first(conn)
-                .context(ErrorKind::Auth)?;
+                .context(ErrorKindAuth::InvalidUser)?;
             Ok(user)
         })?;
 
