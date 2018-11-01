@@ -27,12 +27,14 @@ pub trait CanGetArticle: db::HaveDb {
                 None => (false, false),
             };
 
+            let tags = select_tags(conn, article.id)?;
+
             Ok(res::Article {
                 slug: article.slug,
                 title: article.title,
                 description: article.description,
                 body: article.body,
-                tag_list: Vec::new(),
+                tag_list: tags,
                 created_at: res::DateTimeStr(article.created_at),
                 updated_at: res::DateTimeStr(article.updated_at),
                 favorited,
@@ -69,4 +71,16 @@ fn find_favorite_and_following(
         )).get_result::<(i32, Option<i32>, Option<i32>)>(conn)?;
 
     Ok((fav_id.is_some(), follow_id.is_some()))
+}
+
+fn select_tags(conn: &db::Connection, article_id: i32) -> Result<Vec<String>> {
+    use crate::schema::article_tags;
+    use diesel::prelude::*;
+
+    let tags = article_tags::table
+        .filter(article_tags::article_id.eq(article_id))
+        .select(article_tags::tag_name)
+        .load(conn)?;
+
+    Ok(tags)
 }

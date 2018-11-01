@@ -1,4 +1,5 @@
 use super::get_article::CanGetArticle;
+use super::replace_tags::CanReplaceTags;
 use super::res;
 use super::slugify::CanSlugify;
 use super::ArticleChange;
@@ -9,7 +10,7 @@ use crate::prelude::*;
 
 impl CanUpdateArticle for Hub {}
 
-pub trait CanUpdateArticle: db::HaveDb + CanSlugify + CanGetArticle {
+pub trait CanUpdateArticle: db::HaveDb + CanSlugify + CanGetArticle + CanReplaceTags {
     fn update_article(
         &self,
         user: &User,
@@ -27,6 +28,9 @@ pub trait CanUpdateArticle: db::HaveDb + CanSlugify + CanGetArticle {
             if article.author_id != user.id {
                 return Err(ErrorKind::Auth.into());
             }
+
+            let tag_list = change.tag_list.unwrap_or(Vec::with_capacity(0));
+            self.replace_tags(article.id, tag_list)?;
 
             let change = mdl::ArticleChange {
                 slug: change.title.as_ref().map(|t| self.slugify(t)),

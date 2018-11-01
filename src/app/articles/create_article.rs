@@ -1,3 +1,4 @@
+use super::replace_tags::CanReplaceTags;
 use super::res;
 use super::slugify::CanSlugify;
 use super::NewArticle;
@@ -12,7 +13,7 @@ pub trait CanCreateArticle {
     fn create_article(&self, author: mdl::User, article: NewArticle) -> Result<res::Article>;
 }
 
-pub trait CreateArticle: db::HaveDb + CanSlugify {}
+pub trait CreateArticle: db::HaveDb + CanSlugify + CanReplaceTags {}
 impl<T: CreateArticle> CanCreateArticle for T {
     fn create_article(&self, author: mdl::User, article: NewArticle) -> Result<res::Article> {
         let new_article = mdl::NewArticle {
@@ -22,18 +23,17 @@ impl<T: CreateArticle> CanCreateArticle for T {
             description: article.description,
             body: article.body,
         };
+        let tag_list = article.tag_list;
 
-        let article = self.use_db(|conn| {
-            // TODO: register tags.
-            insert_article(conn, new_article)
-        })?;
+        let article = self.use_db(|conn| insert_article(conn, new_article))?;
+        let tags = self.replace_tags(article.id, tag_list)?;
 
         Ok(res::Article {
             slug: article.slug,
             title: article.title,
             description: article.description,
             body: article.body,
-            tag_list: Vec::new(),
+            tag_list: tags,
             created_at: res::DateTimeStr(article.created_at),
             updated_at: res::DateTimeStr(article.updated_at),
             favorited: false,

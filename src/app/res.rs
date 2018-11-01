@@ -122,6 +122,11 @@ pub struct CommentListResponse {
     pub comments: Vec<Comment>,
 }
 
+#[derive(Debug, Serialize)]
+pub struct TagListResponse {
+    pub tags: Vec<String>,
+}
+
 /// Default serialization of datetime string.
 #[derive(Debug)]
 pub struct DateTimeStr(pub NaiveDateTime);

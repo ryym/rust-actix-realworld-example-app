@@ -7,6 +7,7 @@ mod favorite_article;
 mod feed_articles;
 mod get_article;
 mod list_articles;
+mod replace_tags;
 mod slugify;
 mod unfavorite_article;
 mod update_article;
@@ -42,10 +43,12 @@ pub struct NewArticle {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ArticleChange {
     pub title: Option<String>,
     pub description: Option<String>,
     pub body: Option<String>,
+    pub tag_list: Option<Vec<String>>,
 }
 
 pub fn create_article<S>(
