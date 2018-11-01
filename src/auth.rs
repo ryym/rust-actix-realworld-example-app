@@ -2,7 +2,6 @@ use actix_web::{http::header::AUTHORIZATION, FromRequest, HttpRequest};
 use serde::de::DeserializeOwned;
 
 use crate::db::HaveDb;
-use crate::error::JwtError;
 use crate::hub::Hub;
 use crate::jwt::{CanDecodeJwt, Decoded, Payload};
 use crate::mdl::User;
@@ -27,7 +26,7 @@ impl<T: DecodeAuthToken> CanDecodeAuthToken for T {
 
         match self.decode_jwt(&token)? {
             Decoded::Ok(payload) => Ok(payload),
-            Decoded::Invalid(err) => Err(JwtError(err).context(ErrorKind::Auth).into()),
+            Decoded::Invalid(err) => Err(err.context(ErrorKind::Auth).into()),
         }
     }
 }

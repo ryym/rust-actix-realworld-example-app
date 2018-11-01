@@ -13,7 +13,7 @@ extern crate actix_web;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-extern crate frank_jwt;
+extern crate jsonwebtoken;
 extern crate pbkdf2;
 extern crate rand;
 extern crate serde_json;

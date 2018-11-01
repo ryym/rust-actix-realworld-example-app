@@ -3,11 +3,7 @@
 
 use diesel::result::Error as DieselError;
 use failure::{Backtrace, Context, Fail};
-use frank_jwt as jwt;
-use std::{
-    error,
-    fmt::{self, Debug, Display},
-};
+use std::fmt::{self, Display};
 
 #[derive(Debug)]
 pub struct Error {
@@ -87,25 +83,5 @@ impl From<DieselError> for Error {
             DieselError::NotFound => err.context(ErrorKind::NotFound),
             _ => err.context(ErrorKind::Db),
         }.into()
-    }
-}
-
-// TODO: Update frank_jwt to the next version when released.
-// In v3.0.2, frank_jwt's Error does not implement std::error::Error
-// but it was fixed in the master branch.
-#[derive(Debug)]
-pub struct JwtError(pub jwt::Error);
-
-impl Display for JwtError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        Debug::fmt(&self.0, f)
-    }
-}
-
-impl error::Error for JwtError {}
-
-impl From<jwt::Error> for Error {
-    fn from(err: jwt::Error) -> Error {
-        From::from(JwtError(err).context("JWT error"))
     }
 }
