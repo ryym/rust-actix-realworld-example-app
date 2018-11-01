@@ -1,12 +1,12 @@
-mod add;
-mod delete;
-mod list;
+mod add_comment;
+mod delete_comment;
+mod list_comments;
 
 use actix_web::{Json, Path, State};
 
-use self::add::CanAddComment;
-use self::delete::CanDeleteComment;
-use self::list::CanListComments;
+use self::add_comment::CanAddComment;
+use self::delete_comment::CanDeleteComment;
+use self::list_comments::CanListComments;
 use crate::app::res::{CommentListResponse, CommentResponse};
 use crate::auth::Auth;
 use crate::prelude::*;

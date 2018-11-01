@@ -34,15 +34,14 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
                 .resource("users", |r| r.post().with(users::sign_up))
                 .resource("users/login", |r| r.post().with(users::sign_in))
                 .resource("user", |r| {
-                    r.get().with(users::get_user);
-                    r.put().with(users::update_user)
+                    r.get().with(users::get_current);
+                    r.put().with(users::update)
                 });
 
             // Profiles
             let scope = scope
-                .resource("profiles/{username}", |r| {
-                    r.get().with(profiles::get_profile)
-                }).resource("profiles/{username}/follow", |r| {
+                .resource("profiles/{username}", |r| r.get().with(profiles::get))
+                .resource("profiles/{username}/follow", |r| {
                     r.post().with(profiles::follow);
                     r.delete().with(profiles::unfollow)
                 });
@@ -50,16 +49,16 @@ pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
             // Articles
             let scope = scope
                 .resource("articles", |r| {
-                    r.get().with(articles::list_articles);
-                    r.post().with(articles::create_article)
-                }).resource("articles/feed", |r| r.get().with(articles::feed_articles))
+                    r.get().with(articles::list);
+                    r.post().with(articles::create)
+                }).resource("articles/feed", |r| r.get().with(articles::feed))
                 .resource("articles/{slug}", |r| {
-                    r.get().with(articles::get_article);
-                    r.put().with(articles::update_article);
-                    r.delete().with(articles::delete_article)
+                    r.get().with(articles::get);
+                    r.put().with(articles::update);
+                    r.delete().with(articles::delete)
                 }).resource("articles/{slug}/favorite", |r| {
-                    r.post().with(articles::favorite_article);
-                    r.delete().with(articles::unfavorite_article);
+                    r.post().with(articles::favorite);
+                    r.delete().with(articles::unfavorite);
                 }).resource("articles/{slug}/comments", |r| {
                     r.get().with(articles::comments::list);
                     r.post().with(articles::comments::add)

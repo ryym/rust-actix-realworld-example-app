@@ -26,7 +26,7 @@ pub struct ProfilePath {
     username: String,
 }
 
-pub fn get_profile<S>(
+pub fn get<S>(
     (hub, path, auth): (State<S>, Path<ProfilePath>, Option<Auth>),
 ) -> Result<Json<ProfileResponse>>
 where

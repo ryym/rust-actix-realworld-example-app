@@ -51,7 +51,7 @@ pub struct ArticleChange {
     pub tag_list: Option<Vec<String>>,
 }
 
-pub fn create_article<S>(
+pub fn create<S>(
     (hub, auth, form): (State<S>, Auth, Json<In<NewArticle>>),
 ) -> Result<Json<ArticleResponse>>
 where
@@ -62,7 +62,7 @@ where
     Ok(Json(ArticleResponse { article }))
 }
 
-pub fn get_article<S>(
+pub fn get<S>(
     (hub, auth, slug): (State<S>, Option<Auth>, Path<String>),
 ) -> Result<Json<ArticleResponse>>
 where
@@ -73,7 +73,7 @@ where
     Ok(Json(ArticleResponse { article }))
 }
 
-pub fn update_article<S>(
+pub fn update<S>(
     (hub, auth, slug, form): (State<S>, Auth, Path<String>, Json<In<ArticleChange>>),
 ) -> Result<Json<ArticleResponse>>
 where
@@ -84,7 +84,7 @@ where
     Ok(Json(ArticleResponse { article }))
 }
 
-pub fn delete_article<S>((hub, auth, slug): (State<S>, Auth, Path<String>)) -> Result<Json<()>>
+pub fn delete<S>((hub, auth, slug): (State<S>, Auth, Path<String>)) -> Result<Json<()>>
 where
     S: CanDeleteArticle,
 {
@@ -92,7 +92,7 @@ where
     Ok(Json(()))
 }
 
-pub fn favorite_article<S>(
+pub fn favorite<S>(
     (hub, auth, slug): (State<S>, Auth, Path<String>),
 ) -> Result<Json<ArticleResponse>>
 where
@@ -102,7 +102,7 @@ where
     Ok(Json(ArticleResponse { article }))
 }
 
-pub fn unfavorite_article<S>(
+pub fn unfavorite<S>(
     (hub, auth, slug): (State<S>, Auth, Path<String>),
 ) -> Result<Json<ArticleResponse>>
 where
@@ -112,7 +112,7 @@ where
     Ok(Json(ArticleResponse { article }))
 }
 
-pub fn list_articles<S>(
+pub fn list<S>(
     (hub, auth, params): (State<S>, Option<Auth>, Query<Params>),
 ) -> Result<Json<ArticleListResponse>>
 where
@@ -123,7 +123,7 @@ where
     Ok(Json(ArticleListResponse::new(articles)))
 }
 
-pub fn feed_articles<S>(
+pub fn feed<S>(
     (hub, auth, params): (State<S>, Auth, Query<FeedParams>),
 ) -> Result<Json<ArticleListResponse>>
 where

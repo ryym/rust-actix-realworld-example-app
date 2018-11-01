@@ -71,12 +71,12 @@ where
     Ok(Json(UserResponse { user }))
 }
 
-pub fn get_user(auth: Auth) -> Result<Json<UserResponse>> {
+pub fn get_current(auth: Auth) -> Result<Json<UserResponse>> {
     let user = User::from_model(auth.token, auth.user);
     Ok(Json(UserResponse { user }))
 }
 
-pub fn update_user<S>(
+pub fn update<S>(
     (hub, form, auth): (State<S>, Json<In<UserChange>>, Auth),
 ) -> Result<Json<UserResponse>>
 where
