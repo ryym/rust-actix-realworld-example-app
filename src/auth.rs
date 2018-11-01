@@ -1,5 +1,4 @@
 use actix_web::{http::header::AUTHORIZATION, FromRequest, HttpRequest};
-use serde::de::DeserializeOwned;
 
 use crate::db::HaveDb;
 use crate::hub::Hub;
@@ -9,33 +8,13 @@ use crate::prelude::*;
 
 const TOKEN_PREFIX: &str = "Token ";
 
-impl DecodeAuthToken for Hub {}
 impl Authenticate for Hub {}
-
-pub trait CanDecodeAuthToken {
-    fn decode_auth_token<T: DeserializeOwned>(&self, token: &str) -> Result<T>;
-}
-
-pub trait DecodeAuthToken: CanDecodeJwt {}
-impl<T: DecodeAuthToken> CanDecodeAuthToken for T {
-    fn decode_auth_token<U: DeserializeOwned>(&self, token: &str) -> Result<U> {
-        if !token.starts_with(TOKEN_PREFIX) {
-            return Err(ErrorKind::Auth.into());
-        }
-        let token = token.replacen(TOKEN_PREFIX, "", 1);
-
-        match self.decode_jwt(&token)? {
-            Decoded::Ok(payload) => Ok(payload),
-            Decoded::Invalid(err) => Err(err.context(ErrorKind::Auth).into()),
-        }
-    }
-}
 
 pub trait CanAuthenticate {
     fn authenticate<S>(&self, req: &HttpRequest<S>) -> Result<Auth>;
 }
 
-pub trait Authenticate: CanDecodeAuthToken + HaveDb {}
+pub trait Authenticate: CanDecodeJwt + HaveDb {}
 impl<T: Authenticate> CanAuthenticate for T {
     fn authenticate<S>(&self, req: &HttpRequest<S>) -> Result<Auth> {
         let token = match req.headers().get(AUTHORIZATION) {
@@ -46,7 +25,15 @@ impl<T: Authenticate> CanAuthenticate for T {
                 .to_owned(),
         };
 
-        let payload = self.decode_auth_token::<Payload>(&token)?;
+        if !token.starts_with(TOKEN_PREFIX) {
+            return Err(ErrorKind::Auth.into());
+        }
+        let token = token.replacen(TOKEN_PREFIX, "", 1);
+
+        let payload: Payload = match self.decode_jwt(&token)? {
+            Decoded::Ok(payload) => payload,
+            Decoded::Invalid(err) => return Err(err.context(ErrorKind::Auth).into()),
+        };
 
         let user = self.use_db(|conn| {
             use crate::schema::users::dsl::*;
