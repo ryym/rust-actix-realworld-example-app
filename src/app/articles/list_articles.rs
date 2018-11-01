@@ -12,8 +12,7 @@ impl CanListArticles for Hub {}
 
 #[derive(Debug, Deserialize)]
 pub struct Params {
-    // TODO: Support tag parameter.
-    // tag: Option<String>,
+    tag: Option<String>,
     author: Option<String>,
     favorited: Option<String>,
     limit: Option<u32>,
@@ -48,6 +47,17 @@ fn search_articles(conn: &db::Connection, p: Params) -> Result<Vec<(Article, Use
             .load::<i32>(conn)?;
 
         q = q.filter(id.eq_any(favorited_ids));
+    }
+
+    if let Some(ref tag) = p.tag {
+        use crate::schema::article_tags;
+
+        let article_ids = article_tags::table
+            .filter(article_tags::tag_name.eq(tag))
+            .select(article_tags::article_id)
+            .load::<i32>(conn)?;
+
+        q = q.filter(id.eq_any(article_ids));
     }
 
     let limit = cmp::min(p.limit.unwrap_or(20), 500) as i64;
