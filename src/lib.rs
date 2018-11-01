@@ -4,22 +4,19 @@
 // TODO: Remove this after diesel published 1.4.
 #![allow(proc_macro_derive_resolution_fallback)]
 
-#[macro_use]
-extern crate log;
 extern crate dotenv;
 extern crate env_logger;
-#[macro_use]
 extern crate failure;
+extern crate log;
 
 extern crate actix_web;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-#[macro_use]
-extern crate serde_json;
 extern crate frank_jwt;
 extern crate pbkdf2;
 extern crate rand;
+extern crate serde_json;
 
 extern crate chrono;
 #[macro_use]
@@ -68,7 +65,7 @@ pub fn run() -> Result<(), error::Error> {
     let db_pool = db::new_pool(db_url)?;
 
     let port = env::var("PORT").unwrap_or("3000".to_owned());
-    info!("Starting server at 127.0.0.1:{}", port);
+    log::info!("Starting server at 127.0.0.1:{}", port);
 
     server::new(move || {
         let hub = hub::Hub::create(config.clone(), db_pool.clone());

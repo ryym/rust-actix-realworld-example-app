@@ -1,6 +1,6 @@
 use frank_jwt as jwt;
 use serde::de::DeserializeOwned;
-use serde_json;
+use serde_json::json;
 
 use crate::config::HaveConfig;
 use crate::hub::Hub;

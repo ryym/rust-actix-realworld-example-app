@@ -49,8 +49,6 @@ pub fn sign_up<S>((form, hub): (Json<In<SignupUser>>, State<S>)) -> Result<Json<
 where
     S: CanValidateSignup + CanRegisterUser + CanGenerateJwt,
 {
-    debug!("sign up: {:?}", form);
-
     let form = form.into_inner().user;
     hub.validate_signup(&form)?;
 

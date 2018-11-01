@@ -67,9 +67,9 @@ fn log_error(err: &Error) {
             .map(|e| e.to_string())
             .collect::<Vec<_>>()
             .join("\n");
-        error!("ERROR: {}\nCAUSE: {}", err, causes);
+        log::error!("ERROR: {}\nCAUSE: {}", err, causes);
     } else {
-        error!("ERROR: {}", err);
+        log::error!("ERROR: {}", err);
     };
 }
 
