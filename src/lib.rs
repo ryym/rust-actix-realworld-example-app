@@ -23,6 +23,10 @@ extern crate chrono;
 extern crate diesel;
 extern crate r2d2;
 
+#[cfg(test)]
+#[macro_use]
+mod test;
+
 mod app;
 mod auth;
 mod config;
@@ -32,8 +36,6 @@ mod hub;
 mod jwt;
 mod mdl;
 mod schema;
-#[cfg(test)]
-mod test;
 
 pub mod prelude {
     use super::error;

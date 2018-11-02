@@ -26,3 +26,17 @@ pub fn init() -> Result<Test> {
         database_url: DB_URL.to_owned(),
     })
 }
+
+/// Implement HaveDb.
+macro_rules! impl_have_db {
+    ($struct:ident($field:ident)) => {
+        impl db::HaveDb for $struct {
+            fn use_db<F, T>(&self, f: F) -> Result<T>
+            where
+                F: FnOnce(&db::Conn) -> Result<T>,
+            {
+                f(&self.$field)
+            }
+        }
+    };
+}
