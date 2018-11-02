@@ -12,7 +12,7 @@ impl CanBuildArticleList for Hub {}
 pub trait CanBuildArticleList {
     fn build_article_list(
         &self,
-        conn: &db::Connection,
+        conn: &db::Conn,
         articles: Vec<(Article, User)>,
         user: Option<&User>,
     ) -> Result<Vec<res::Article>> {
@@ -54,11 +54,7 @@ pub trait CanBuildArticleList {
     }
 }
 
-fn select_favorites(
-    conn: &db::Connection,
-    user_id: i32,
-    article_ids: &[i32],
-) -> Result<HashSet<i32>> {
+fn select_favorites(conn: &db::Conn, user_id: i32, article_ids: &[i32]) -> Result<HashSet<i32>> {
     use crate::schema::favorite_articles as favs;
 
     let ids = favs::table
@@ -70,11 +66,7 @@ fn select_favorites(
     Ok(ids.into_iter().collect())
 }
 
-fn select_followings(
-    conn: &db::Connection,
-    user_id: i32,
-    author_ids: &[i32],
-) -> Result<HashSet<i32>> {
+fn select_followings(conn: &db::Conn, user_id: i32, author_ids: &[i32]) -> Result<HashSet<i32>> {
     use crate::schema::followers as flws;
 
     let ids = flws::table
@@ -86,7 +78,7 @@ fn select_followings(
     Ok(ids.into_iter().collect())
 }
 
-fn select_favorite_counts(conn: &db::Connection, article_ids: &[i32]) -> Result<HashMap<i32, i64>> {
+fn select_favorite_counts(conn: &db::Conn, article_ids: &[i32]) -> Result<HashMap<i32, i64>> {
     use crate::schema::favorite_articles as favs;
     use diesel::{dsl::sql, sql_types::BigInt};
 

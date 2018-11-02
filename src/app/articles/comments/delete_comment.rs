@@ -5,7 +5,7 @@ impl CanDeleteComment for Hub {}
 pub trait CanDeleteComment {
     fn delete_comment(
         &self,
-        conn: &db::Connection,
+        conn: &db::Conn,
         slug: &str,
         author: &User,
         comment_id: i32,

@@ -1,14 +1,14 @@
 use crate::config::{Config, HaveConfig};
-use crate::db::{self, Connection, HaveDb, Pool};
+use crate::db;
 use crate::prelude::*;
 
 pub struct Hub {
     config: Config,
-    db_pool: Pool,
+    db_pool: db::Pool,
 }
 
 impl Hub {
-    pub fn create(config: Config, db_pool: Pool) -> Hub {
+    pub fn create(config: Config, db_pool: db::Pool) -> Hub {
         Hub { config, db_pool }
     }
 }
@@ -19,19 +19,12 @@ impl HaveConfig for Hub {
     }
 }
 
-impl HaveDb for Hub {
+impl db::HaveDb for Hub {
     fn use_db<F, T>(&self, f: F) -> Result<T>
     where
-        F: FnOnce(&Connection) -> Result<T>,
+        F: FnOnce(&db::Conn) -> Result<T>,
     {
         let conn = db::get_conn(&self.db_pool)?;
         f(&conn)
-    }
-}
-
-impl db::HaveConn for Hub {
-    fn conn(&self) -> Result<db::PooledConn> {
-        let conn = self.db_pool.get().context("obtain DB connection")?;
-        Ok(conn)
     }
 }

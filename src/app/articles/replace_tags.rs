@@ -6,7 +6,7 @@ impl CanReplaceTags for Hub {}
 pub trait CanReplaceTags {
     fn replace_tags(
         &self,
-        conn: &db::Connection,
+        conn: &db::Conn,
         article_id: i32,
         tags: Vec<String>,
     ) -> Result<Vec<String>> {

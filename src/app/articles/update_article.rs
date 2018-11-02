@@ -14,7 +14,7 @@ impl CanUpdateArticle for Hub {}
 pub trait CanUpdateArticle: CanSlugify + CanGetArticle + CanReplaceTags {
     fn update_article(
         &self,
-        conn: &db::Connection,
+        conn: &db::Conn,
         user: &User,
         slug: &str,
         change: ArticleChange,

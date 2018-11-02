@@ -8,12 +8,7 @@ use crate::prelude::*;
 impl CanFavoriteArticle for Hub {}
 
 pub trait CanFavoriteArticle: CanGetArticle {
-    fn favorite_article(
-        &self,
-        conn: &db::Connection,
-        user: &User,
-        slug: &str,
-    ) -> Result<res::Article> {
+    fn favorite_article(&self, conn: &db::Conn, user: &User, slug: &str) -> Result<res::Article> {
         use crate::schema::{articles, favorite_articles as fav_articles};
         use diesel::{self, prelude::*};
 

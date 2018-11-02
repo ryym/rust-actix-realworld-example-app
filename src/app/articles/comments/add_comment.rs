@@ -10,7 +10,7 @@ impl CanAddComment for Hub {}
 pub trait CanAddComment {
     fn add_comment(
         &self,
-        conn: &db::Connection,
+        conn: &db::Conn,
         slug: &str,
         author: User,
         comment: NewComment,

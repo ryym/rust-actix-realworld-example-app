@@ -7,7 +7,7 @@ use crate::prelude::*;
 impl CanDeleteArticle for Hub {}
 
 pub trait CanDeleteArticle {
-    fn delete_article(&self, conn: &db::Connection, user: &User, slug: &str) -> Result<()> {
+    fn delete_article(&self, conn: &db::Conn, user: &User, slug: &str) -> Result<()> {
         use crate::schema::articles;
         use diesel::{self, prelude::*};
 

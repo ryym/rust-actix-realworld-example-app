@@ -9,7 +9,7 @@ impl CanGetArticle for Hub {}
 pub trait CanGetArticle {
     fn get_article(
         &self,
-        conn: &db::Connection,
+        conn: &db::Conn,
         slug: &str,
         current: Option<&User>,
     ) -> Result<res::Article> {
@@ -49,7 +49,7 @@ pub trait CanGetArticle {
 }
 
 fn find_favorite_and_following(
-    conn: &db::Connection,
+    conn: &db::Conn,
     article_id: i32,
     author_id: i32,
     user: &User,
@@ -76,7 +76,7 @@ fn find_favorite_and_following(
     Ok((fav_id.is_some(), follow_id.is_some()))
 }
 
-fn select_tags(conn: &db::Connection, article_id: i32) -> Result<Vec<String>> {
+fn select_tags(conn: &db::Conn, article_id: i32) -> Result<Vec<String>> {
     use crate::schema::article_tags;
     use diesel::prelude::*;
 

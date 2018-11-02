@@ -10,12 +10,12 @@ use crate::prelude::*;
 impl RegisterUser for Hub {}
 
 pub trait CanRegisterUser {
-    fn register_user(&self, conn: &db::Connection, form: &SignupUser) -> Result<User>;
+    fn register_user(&self, conn: &db::Conn, form: &SignupUser) -> Result<User>;
 }
 
 pub trait RegisterUser: CanHashPassword {}
 impl<T: RegisterUser> CanRegisterUser for T {
-    fn register_user(&self, conn: &db::Connection, form: &SignupUser) -> Result<User> {
+    fn register_user(&self, conn: &db::Conn, form: &SignupUser) -> Result<User> {
         conn.transaction(|| {
             let user = insert_user(conn, &form)?;
             let password_hash = self.hash_password(&form.password)?;
@@ -25,7 +25,7 @@ impl<T: RegisterUser> CanRegisterUser for T {
     }
 }
 
-fn insert_user(conn: &db::Connection, form: &SignupUser) -> Result<User> {
+fn insert_user(conn: &db::Conn, form: &SignupUser) -> Result<User> {
     use crate::schema::users::dsl::*;
 
     let new_user = NewUser {
@@ -41,7 +41,7 @@ fn insert_user(conn: &db::Connection, form: &SignupUser) -> Result<User> {
     Ok(user)
 }
 
-fn insert_credential(conn: &db::Connection, user_id: i32, password_hash: String) -> Result<()> {
+fn insert_credential(conn: &db::Conn, user_id: i32, password_hash: String) -> Result<()> {
     use crate::schema::credentials;
 
     let new_cred = NewCredential {

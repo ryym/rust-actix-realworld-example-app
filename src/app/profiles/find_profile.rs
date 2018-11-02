@@ -11,7 +11,7 @@ impl CanFindProfile for Hub {}
 pub trait CanFindProfile {
     fn find_profile(
         &self,
-        conn: &db::Connection,
+        conn: &db::Conn,
         username: &str,
         current: Option<&User>,
     ) -> Result<Profile> {
@@ -25,7 +25,7 @@ pub trait CanFindProfile {
     }
 }
 
-fn is_follower(conn: &db::Connection, user_id: i32, follower_id: i32) -> Result<bool> {
+fn is_follower(conn: &db::Conn, user_id: i32, follower_id: i32) -> Result<bool> {
     use crate::schema::followers as fl;
 
     let id = fl::table

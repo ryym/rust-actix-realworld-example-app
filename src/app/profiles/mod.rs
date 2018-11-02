@@ -13,7 +13,7 @@ use crate::db;
 use crate::mdl::User;
 use crate::prelude::*;
 
-fn find_user(conn: &db::Connection, username: &str) -> Result<User> {
+fn find_user(conn: &db::Conn, username: &str) -> Result<User> {
     use crate::schema::users as u;
     use diesel::prelude::*;
 

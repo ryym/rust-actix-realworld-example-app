@@ -8,7 +8,7 @@ impl CanRemoveFollower for Hub {}
 pub trait CanRemoveFollower {
     fn remove_follower(
         &self,
-        conn: &db::Connection,
+        conn: &db::Conn,
         username: &str,
         follower_id: i32,
     ) -> Result<Profile> {
@@ -18,7 +18,7 @@ pub trait CanRemoveFollower {
     }
 }
 
-fn delete_follower(conn: &db::Connection, user_id: i32, follower_id: i32) -> Result<()> {
+fn delete_follower(conn: &db::Conn, user_id: i32, follower_id: i32) -> Result<()> {
     use crate::schema::followers as fl;
     use diesel::prelude::*;
 

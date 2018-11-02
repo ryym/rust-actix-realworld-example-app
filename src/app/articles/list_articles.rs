@@ -22,7 +22,7 @@ pub struct Params {
 pub trait CanListArticles: CanBuildArticleList {
     fn list_articles(
         &self,
-        conn: &db::Connection,
+        conn: &db::Conn,
         params: Params,
         user: Option<&User>,
     ) -> Result<Vec<res::Article>> {
@@ -31,7 +31,7 @@ pub trait CanListArticles: CanBuildArticleList {
     }
 }
 
-fn search_articles(conn: &db::Connection, p: Params) -> Result<Vec<(Article, User)>> {
+fn search_articles(conn: &db::Conn, p: Params) -> Result<Vec<(Article, User)>> {
     use crate::schema::{articles::dsl::*, users};
 
     let mut q = articles.inner_join(users::table).into_boxed();

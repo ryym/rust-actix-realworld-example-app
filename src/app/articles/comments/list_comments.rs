@@ -10,7 +10,7 @@ impl CanListComments for Hub {}
 pub trait CanListComments {
     fn list_comments(
         &self,
-        conn: &db::Connection,
+        conn: &db::Conn,
         slug: &str,
         user: Option<&User>,
     ) -> Result<Vec<res::Comment>> {
@@ -47,11 +47,7 @@ pub trait CanListComments {
 }
 
 // TODO: DRY (copied from app::articles::build_article_list).
-fn select_followings(
-    conn: &db::Connection,
-    user_id: i32,
-    author_ids: &[i32],
-) -> Result<HashSet<i32>> {
+fn select_followings(conn: &db::Conn, user_id: i32, author_ids: &[i32]) -> Result<HashSet<i32>> {
     use crate::schema::followers as flws;
 
     let ids = flws::table

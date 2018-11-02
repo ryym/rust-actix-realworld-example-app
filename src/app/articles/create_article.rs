@@ -12,7 +12,7 @@ impl CreateArticle for Hub {}
 pub trait CanCreateArticle {
     fn create_article(
         &self,
-        conn: &db::Connection,
+        conn: &db::Conn,
         author: mdl::User,
         article: NewArticle,
     ) -> Result<res::Article>;
@@ -22,7 +22,7 @@ pub trait CreateArticle: CanSlugify + CanReplaceTags {}
 impl<T: CreateArticle> CanCreateArticle for T {
     fn create_article(
         &self,
-        conn: &db::Connection,
+        conn: &db::Conn,
         author: mdl::User,
         article: NewArticle,
     ) -> Result<res::Article> {
@@ -53,7 +53,7 @@ impl<T: CreateArticle> CanCreateArticle for T {
     }
 }
 
-fn insert_article(conn: &db::Connection, article: mdl::NewArticle) -> Result<mdl::Article> {
+fn insert_article(conn: &db::Conn, article: mdl::NewArticle) -> Result<mdl::Article> {
     use crate::schema::articles;
     use diesel::{self, prelude::*};
 

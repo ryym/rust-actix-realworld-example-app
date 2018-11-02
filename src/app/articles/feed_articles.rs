@@ -19,7 +19,7 @@ impl CanFeedArticles for Hub {}
 pub trait CanFeedArticles: CanBuildArticleList {
     fn feed_articles(
         &self,
-        conn: &db::Connection,
+        conn: &db::Conn,
         user: &User,
         params: Params,
     ) -> Result<Vec<res::Article>> {
@@ -29,7 +29,7 @@ pub trait CanFeedArticles: CanBuildArticleList {
     }
 }
 
-fn select_followed_authors(conn: &db::Connection, user_id: i32) -> Result<Vec<i32>> {
+fn select_followed_authors(conn: &db::Conn, user_id: i32) -> Result<Vec<i32>> {
     use crate::schema::followers as flws;
 
     let ids = flws::table
@@ -39,11 +39,7 @@ fn select_followed_authors(conn: &db::Connection, user_id: i32) -> Result<Vec<i3
     Ok(ids)
 }
 
-fn select_articles(
-    conn: &db::Connection,
-    author_ids: &[i32],
-    p: Params,
-) -> Result<Vec<(Article, User)>> {
+fn select_articles(conn: &db::Conn, author_ids: &[i32], p: Params) -> Result<Vec<(Article, User)>> {
     use crate::schema::{articles, users};
 
     let limit = cmp::min(p.limit.unwrap_or(20), 500) as i64;

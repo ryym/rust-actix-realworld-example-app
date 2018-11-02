@@ -6,19 +6,18 @@ use diesel::{
 
 use crate::prelude::*;
 
-pub type Connection = diesel::pg::PgConnection;
-pub type Pool = r2d2::Pool<ConnectionManager<Connection>>;
-pub type PooledConn = PooledConnection<ConnectionManager<Connection>>;
+pub type Conn = diesel::pg::PgConnection;
+pub type Pool = r2d2::Pool<ConnectionManager<Conn>>;
 
 pub fn new_pool<S: Into<String>>(db_url: S) -> Result<Pool> {
-    let manager = ConnectionManager::<Connection>::new(db_url.into());
+    let manager = ConnectionManager::<Conn>::new(db_url.into());
     let pool = r2d2::Pool::builder()
         .build(manager)
         .context("build DB pool")?;
     Ok(pool)
 }
 
-pub fn get_conn(pool: &Pool) -> Result<PooledConnection<ConnectionManager<Connection>>> {
+pub fn get_conn(pool: &Pool) -> Result<PooledConnection<ConnectionManager<Conn>>> {
     let conn = pool.get().context("obtain DB connection")?;
     Ok(conn)
 }
@@ -26,11 +25,7 @@ pub fn get_conn(pool: &Pool) -> Result<PooledConnection<ConnectionManager<Connec
 pub trait HaveDb {
     fn use_db<F, T>(&self, f: F) -> Result<T>
     where
-        F: FnOnce(&Connection) -> Result<T>;
-}
-
-pub trait HaveConn {
-    fn conn(&self) -> Result<PooledConn>;
+        F: FnOnce(&Conn) -> Result<T>;
 }
 
 /// Ignores diesel's `QueryBuilderError` silently. This error could occur when

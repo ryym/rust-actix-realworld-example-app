@@ -7,12 +7,12 @@ use crate::prelude::*;
 impl Authenticate for Hub {}
 
 pub trait CanAuthenticate {
-    fn authenticate(&self, conn: &db::Connection, form: &SigninUser) -> Result<User>;
+    fn authenticate(&self, conn: &db::Conn, form: &SigninUser) -> Result<User>;
 }
 
 pub trait Authenticate: CanCheckPassword {}
 impl<T: Authenticate> CanAuthenticate for T {
-    fn authenticate(&self, conn: &db::Connection, form: &SigninUser) -> Result<User> {
+    fn authenticate(&self, conn: &db::Conn, form: &SigninUser) -> Result<User> {
         use crate::schema::{credentials::dsl::*, users::dsl::*};
         use diesel::prelude::*;
 
