@@ -32,6 +32,8 @@ mod hub;
 mod jwt;
 mod mdl;
 mod schema;
+#[cfg(test)]
+mod test;
 
 pub mod prelude {
     use super::error;
