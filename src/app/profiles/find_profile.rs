@@ -6,24 +6,20 @@ use crate::hub::Hub;
 use crate::mdl::User;
 use crate::prelude::*;
 
-impl FindProfile for Hub {}
+impl CanFindProfile for Hub {}
 
 pub trait CanFindProfile {
-    fn find_profile(&self, username: &str, current: Option<&User>) -> Result<Profile>;
-}
-
-pub trait FindProfile: db::HaveDb {}
-impl<T: FindProfile> CanFindProfile for T {
-    fn find_profile(&self, username: &str, current: Option<&User>) -> Result<Profile> {
-        let (user, following) = self.use_db(|conn| {
-            let user = find_user(conn, username)?;
-            let following = match current {
-                None => false,
-                Some(current) => is_follower(conn, user.id, current.id)?,
-            };
-
-            Ok((user, following))
-        })?;
+    fn find_profile(
+        &self,
+        conn: &db::Connection,
+        username: &str,
+        current: Option<&User>,
+    ) -> Result<Profile> {
+        let user = find_user(conn, username)?;
+        let following = match current {
+            None => false,
+            Some(current) => is_follower(conn, user.id, current.id)?,
+        };
 
         Ok(Profile::from_user(user, following))
     }

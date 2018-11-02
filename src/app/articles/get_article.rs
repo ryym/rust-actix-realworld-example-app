@@ -6,41 +6,44 @@ use crate::prelude::*;
 
 impl CanGetArticle for Hub {}
 
-pub trait CanGetArticle: db::HaveDb {
-    fn get_article(&self, slug: &str, current: Option<&User>) -> Result<res::Article> {
-        self.use_db(|conn| {
-            use crate::schema::{articles, favorite_articles as fav_articles, users as authors};
-            use diesel::prelude::*;
+pub trait CanGetArticle {
+    fn get_article(
+        &self,
+        conn: &db::Connection,
+        slug: &str,
+        current: Option<&User>,
+    ) -> Result<res::Article> {
+        use crate::schema::{articles, favorite_articles as fav_articles, users as authors};
+        use diesel::prelude::*;
 
-            let (article, author) = articles::table
-                .inner_join(authors::table)
-                .filter(articles::slug.eq(slug))
-                .get_result::<(Article, User)>(conn)?;
+        let (article, author) = articles::table
+            .inner_join(authors::table)
+            .filter(articles::slug.eq(slug))
+            .get_result::<(Article, User)>(conn)?;
 
-            let favorites_count = fav_articles::table
-                .filter(fav_articles::article_id.eq(article.id))
-                .count()
-                .get_result::<i64>(conn)?;
+        let favorites_count = fav_articles::table
+            .filter(fav_articles::article_id.eq(article.id))
+            .count()
+            .get_result::<i64>(conn)?;
 
-            let (favorited, author_followed) = match current {
-                Some(current) => find_favorite_and_following(conn, article.id, author.id, current)?,
-                None => (false, false),
-            };
+        let (favorited, author_followed) = match current {
+            Some(current) => find_favorite_and_following(conn, article.id, author.id, current)?,
+            None => (false, false),
+        };
 
-            let tags = select_tags(conn, article.id)?;
+        let tags = select_tags(conn, article.id)?;
 
-            Ok(res::Article {
-                slug: article.slug,
-                title: article.title,
-                description: article.description,
-                body: article.body,
-                tag_list: tags,
-                created_at: res::DateTimeStr(article.created_at),
-                updated_at: res::DateTimeStr(article.updated_at),
-                favorited,
-                favorites_count,
-                author: res::Profile::from_user(author, author_followed),
-            })
+        Ok(res::Article {
+            slug: article.slug,
+            title: article.title,
+            description: article.description,
+            body: article.body,
+            tag_list: tags,
+            created_at: res::DateTimeStr(article.created_at),
+            updated_at: res::DateTimeStr(article.updated_at),
+            favorited,
+            favorites_count,
+            author: res::Profile::from_user(author, author_followed),
         })
     }
 }

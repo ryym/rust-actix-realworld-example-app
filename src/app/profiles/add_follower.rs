@@ -6,21 +6,17 @@ use crate::hub::Hub;
 use crate::mdl::{NewFollower, User};
 use crate::prelude::*;
 
-impl AddFollower for Hub {}
+impl CanAddFollower for Hub {}
 
 pub trait CanAddFollower {
-    fn add_follower(&self, username: &str, follower_id: i32) -> Result<Profile>;
-}
-
-pub trait AddFollower: db::HaveDb {}
-impl<T: AddFollower> CanAddFollower for T {
-    fn add_follower(&self, username: &str, follower_id: i32) -> Result<Profile> {
-        let user = self.use_db(|conn| {
-            let user = find_user(conn, username)?;
-            insert_follower(conn, &user, follower_id)?;
-            Ok(user)
-        })?;
-
+    fn add_follower(
+        &self,
+        conn: &db::Connection,
+        username: &str,
+        follower_id: i32,
+    ) -> Result<Profile> {
+        let user = find_user(conn, username)?;
+        insert_follower(conn, &user, follower_id)?;
         Ok(Profile::from_user(user, true))
     }
 }

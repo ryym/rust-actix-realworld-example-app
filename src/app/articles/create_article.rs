@@ -10,12 +10,22 @@ use crate::prelude::*;
 impl CreateArticle for Hub {}
 
 pub trait CanCreateArticle {
-    fn create_article(&self, author: mdl::User, article: NewArticle) -> Result<res::Article>;
+    fn create_article(
+        &self,
+        conn: &db::Connection,
+        author: mdl::User,
+        article: NewArticle,
+    ) -> Result<res::Article>;
 }
 
-pub trait CreateArticle: db::HaveDb + CanSlugify + CanReplaceTags {}
+pub trait CreateArticle: CanSlugify + CanReplaceTags {}
 impl<T: CreateArticle> CanCreateArticle for T {
-    fn create_article(&self, author: mdl::User, article: NewArticle) -> Result<res::Article> {
+    fn create_article(
+        &self,
+        conn: &db::Connection,
+        author: mdl::User,
+        article: NewArticle,
+    ) -> Result<res::Article> {
         let new_article = mdl::NewArticle {
             author_id: author.id,
             slug: self.slugify(&article.title),
@@ -25,8 +35,8 @@ impl<T: CreateArticle> CanCreateArticle for T {
         };
         let tag_list = article.tag_list;
 
-        let article = self.use_db(|conn| insert_article(conn, new_article))?;
-        let tags = self.replace_tags(article.id, tag_list)?;
+        let article = insert_article(conn, new_article)?;
+        let tags = self.replace_tags(conn, article.id, tag_list)?;
 
         Ok(res::Article {
             slug: article.slug,

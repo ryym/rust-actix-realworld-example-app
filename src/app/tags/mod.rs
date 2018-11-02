@@ -4,12 +4,13 @@ use actix_web::{Json, State};
 
 use self::list_tags::CanListTags;
 use crate::app::res::TagListResponse;
+use crate::db;
 use crate::prelude::*;
 
 pub fn list<S>(hub: State<S>) -> Result<Json<TagListResponse>>
 where
-    S: CanListTags,
+    S: db::HaveDb + CanListTags,
 {
-    let tags = hub.list_tags()?;
+    let tags = hub.use_db(|conn| hub.list_tags(conn))?;
     Ok(Json(TagListResponse { tags }))
 }

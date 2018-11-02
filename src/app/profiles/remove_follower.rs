@@ -3,21 +3,17 @@ use crate::db;
 use crate::hub::Hub;
 use crate::prelude::*;
 
-impl RemoveFollower for Hub {}
+impl CanRemoveFollower for Hub {}
 
 pub trait CanRemoveFollower {
-    fn remove_follower(&self, username: &str, follower_id: i32) -> Result<Profile>;
-}
-
-pub trait RemoveFollower: db::HaveDb {}
-impl<T: RemoveFollower> CanRemoveFollower for T {
-    fn remove_follower(&self, username: &str, follower_id: i32) -> Result<Profile> {
-        let user = self.use_db(|conn| {
-            let user = find_user(conn, username)?;
-            delete_follower(conn, user.id, follower_id)?;
-            Ok(user)
-        })?;
-
+    fn remove_follower(
+        &self,
+        conn: &db::Connection,
+        username: &str,
+        follower_id: i32,
+    ) -> Result<Profile> {
+        let user = find_user(conn, username)?;
+        delete_follower(conn, user.id, follower_id)?;
         Ok(Profile::from_user(user, false))
     }
 }

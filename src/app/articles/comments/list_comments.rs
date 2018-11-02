@@ -7,39 +7,42 @@ use crate::{db, hub::Hub, prelude::*};
 
 impl CanListComments for Hub {}
 
-pub trait CanListComments: db::HaveDb {
-    fn list_comments(&self, slug: &str, user: Option<&User>) -> Result<Vec<res::Comment>> {
-        self.use_db(|conn| {
-            use crate::schema::{articles, comments, users};
+pub trait CanListComments {
+    fn list_comments(
+        &self,
+        conn: &db::Connection,
+        slug: &str,
+        user: Option<&User>,
+    ) -> Result<Vec<res::Comment>> {
+        use crate::schema::{articles, comments, users};
 
-            let article_id = articles::table
-                .filter(articles::slug.eq(slug))
-                .select(articles::id)
-                .get_result::<i32>(conn)?;
+        let article_id = articles::table
+            .filter(articles::slug.eq(slug))
+            .select(articles::id)
+            .get_result::<i32>(conn)?;
 
-            let comments = comments::table
-                .inner_join(users::table)
-                .filter(comments::article_id.eq(article_id))
-                .load::<(Comment, User)>(conn)?;
+        let comments = comments::table
+            .inner_join(users::table)
+            .filter(comments::article_id.eq(article_id))
+            .load::<(Comment, User)>(conn)?;
 
-            let followings = match user {
-                Some(user) => {
-                    let author_ids = comments.iter().map(|(_, u)| u.id).collect::<Vec<_>>();
-                    select_followings(conn, user.id, &author_ids)?
-                }
-                None => HashSet::with_capacity(0),
-            };
+        let followings = match user {
+            Some(user) => {
+                let author_ids = comments.iter().map(|(_, u)| u.id).collect::<Vec<_>>();
+                select_followings(conn, user.id, &author_ids)?
+            }
+            None => HashSet::with_capacity(0),
+        };
 
-            let comments = comments
-                .into_iter()
-                .map(|(c, u)| {
-                    let following = followings.contains(&u.id);
-                    let author = res::Profile::from_user(u, following);
-                    res::Comment::new(c, author)
-                }).collect();
+        let comments = comments
+            .into_iter()
+            .map(|(c, u)| {
+                let following = followings.contains(&u.id);
+                let author = res::Profile::from_user(u, following);
+                res::Comment::new(c, author)
+            }).collect();
 
-            Ok(comments)
-        })
+        Ok(comments)
     }
 }
 

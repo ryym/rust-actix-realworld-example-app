@@ -28,3 +28,10 @@ impl HaveDb for Hub {
         f(&conn)
     }
 }
+
+impl db::HaveConn for Hub {
+    fn conn(&self) -> Result<db::PooledConn> {
+        let conn = self.db_pool.get().context("obtain DB connection")?;
+        Ok(conn)
+    }
+}

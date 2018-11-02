@@ -19,12 +19,15 @@ pub struct Params {
     offset: Option<u32>,
 }
 
-pub trait CanListArticles: db::HaveDb + CanBuildArticleList {
-    fn list_articles(&self, params: Params, user: Option<&User>) -> Result<Vec<res::Article>> {
-        self.use_db(|conn| {
-            let articles = search_articles(conn, params)?;
-            self.build_article_list(conn, articles, user)
-        })
+pub trait CanListArticles: CanBuildArticleList {
+    fn list_articles(
+        &self,
+        conn: &db::Connection,
+        params: Params,
+        user: Option<&User>,
+    ) -> Result<Vec<res::Article>> {
+        let articles = search_articles(conn, params)?;
+        self.build_article_list(conn, articles, user)
     }
 }
 

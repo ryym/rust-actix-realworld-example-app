@@ -26,6 +26,7 @@ use self::unfavorite_article::CanUnfavoriteArticle;
 use self::update_article::CanUpdateArticle;
 use super::res::{ArticleListResponse, ArticleResponse};
 use crate::auth::Auth;
+use crate::db;
 use crate::prelude::*;
 
 #[derive(Debug, Deserialize)]
@@ -55,10 +56,10 @@ pub fn create<S>(
     (hub, auth, form): (State<S>, Auth, Json<In<NewArticle>>),
 ) -> Result<Json<ArticleResponse>>
 where
-    S: CanCreateArticle,
+    S: db::HaveDb + CanCreateArticle,
 {
     let new_article = form.into_inner().article;
-    let article = hub.create_article(auth.user, new_article)?;
+    let article = hub.use_db(|conn| hub.create_article(conn, auth.user, new_article))?;
     Ok(Json(ArticleResponse { article }))
 }
 
@@ -66,10 +67,10 @@ pub fn get<S>(
     (hub, auth, slug): (State<S>, Option<Auth>, Path<String>),
 ) -> Result<Json<ArticleResponse>>
 where
-    S: CanGetArticle,
+    S: db::HaveDb + CanGetArticle,
 {
     let user = auth.map(|a| a.user);
-    let article = hub.get_article(&slug, user.as_ref())?;
+    let article = hub.use_db(|conn| hub.get_article(conn, &slug, user.as_ref()))?;
     Ok(Json(ArticleResponse { article }))
 }
 
@@ -77,18 +78,18 @@ pub fn update<S>(
     (hub, auth, slug, form): (State<S>, Auth, Path<String>, Json<In<ArticleChange>>),
 ) -> Result<Json<ArticleResponse>>
 where
-    S: CanUpdateArticle,
+    S: db::HaveDb + CanUpdateArticle,
 {
     let change = form.into_inner().article;
-    let article = hub.update_article(&auth.user, &slug, change)?;
+    let article = hub.use_db(|conn| hub.update_article(conn, &auth.user, &slug, change))?;
     Ok(Json(ArticleResponse { article }))
 }
 
 pub fn delete<S>((hub, auth, slug): (State<S>, Auth, Path<String>)) -> Result<Json<()>>
 where
-    S: CanDeleteArticle,
+    S: db::HaveDb + CanDeleteArticle,
 {
-    hub.delete_article(&auth.user, &slug)?;
+    hub.use_db(|conn| hub.delete_article(conn, &auth.user, &slug))?;
     Ok(Json(()))
 }
 
@@ -96,9 +97,9 @@ pub fn favorite<S>(
     (hub, auth, slug): (State<S>, Auth, Path<String>),
 ) -> Result<Json<ArticleResponse>>
 where
-    S: CanFavoriteArticle,
+    S: db::HaveDb + CanFavoriteArticle,
 {
-    let article = hub.favorite_article(&auth.user, &slug)?;
+    let article = hub.use_db(|conn| hub.favorite_article(conn, &auth.user, &slug))?;
     Ok(Json(ArticleResponse { article }))
 }
 
@@ -106,9 +107,9 @@ pub fn unfavorite<S>(
     (hub, auth, slug): (State<S>, Auth, Path<String>),
 ) -> Result<Json<ArticleResponse>>
 where
-    S: CanUnfavoriteArticle,
+    S: db::HaveDb + CanUnfavoriteArticle,
 {
-    let article = hub.unfavorite_article(&auth.user, &slug)?;
+    let article = hub.use_db(|conn| hub.unfavorite_article(conn, &auth.user, &slug))?;
     Ok(Json(ArticleResponse { article }))
 }
 
@@ -116,10 +117,11 @@ pub fn list<S>(
     (hub, auth, params): (State<S>, Option<Auth>, Query<Params>),
 ) -> Result<Json<ArticleListResponse>>
 where
-    S: CanListArticles,
+    S: db::HaveDb + CanListArticles,
 {
     let user = auth.map(|a| a.user);
-    let articles = hub.list_articles(params.into_inner(), user.as_ref())?;
+    let articles =
+        hub.use_db(|conn| hub.list_articles(conn, params.into_inner(), user.as_ref()))?;
     Ok(Json(ArticleListResponse::new(articles)))
 }
 
@@ -127,8 +129,8 @@ pub fn feed<S>(
     (hub, auth, params): (State<S>, Auth, Query<FeedParams>),
 ) -> Result<Json<ArticleListResponse>>
 where
-    S: CanFeedArticles,
+    S: db::HaveDb + CanFeedArticles,
 {
-    let articles = hub.feed_articles(&auth.user, params.into_inner())?;
+    let articles = hub.use_db(|conn| hub.feed_articles(conn, &auth.user, params.into_inner()))?;
     Ok(Json(ArticleListResponse::new(articles)))
 }

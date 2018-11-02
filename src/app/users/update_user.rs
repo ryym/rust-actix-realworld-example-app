@@ -1,5 +1,5 @@
 use super::password::CanHashPassword;
-use crate::db::{self, HaveDb};
+use crate::db;
 use crate::hub::Hub;
 use crate::mdl::{CredentialChange, User, UserChange};
 use crate::prelude::*;
@@ -12,12 +12,28 @@ pub struct UserChanges {
 }
 
 pub trait CanUpdateUser {
-    fn update_user(&self, current: User, change: UserChanges) -> Result<User>;
+    fn update_user(
+        &self,
+        conn: &db::Connection,
+        current: User,
+        change: UserChanges,
+    ) -> Result<User>;
 }
 
-pub trait UpdateUser: CanHashPassword + HaveDb {}
+pub trait UpdateUser: CanHashPassword {}
 impl<T: UpdateUser> CanUpdateUser for T {
-    fn update_user(&self, current: User, change: UserChanges) -> Result<User> {
+    fn update_user(
+        &self,
+        conn: &db::Connection,
+        current: User,
+        change: UserChanges,
+    ) -> Result<User> {
+        use crate::schema::{
+            credentials::dsl::*,
+            users::{self, dsl::*},
+        };
+        use diesel::prelude::*;
+
         let given = change.user;
         let user_change = UserChange {
             username: if_changed(given.username, &current.username),
@@ -33,28 +49,20 @@ impl<T: UpdateUser> CanUpdateUser for T {
             },
         };
 
-        self.use_db(|conn| {
-            use crate::schema::{
-                credentials::dsl::*,
-                users::{self, dsl::*},
-            };
-            use diesel::prelude::*;
+        conn.transaction(|| {
+            db::may_update(
+                diesel::update(credentials.filter(user_id.eq(current.id)))
+                    .set(cred_change)
+                    .execute(conn),
+            )?;
 
-            conn.transaction(|| {
-                db::may_update(
-                    diesel::update(credentials.filter(user_id.eq(current.id)))
-                        .set(cred_change)
-                        .execute(conn),
-                )?;
+            let user = db::may_update(
+                diesel::update(users.filter(users::id.eq(current.id)))
+                    .set(user_change)
+                    .get_result(conn),
+            )?.unwrap_or(current);
 
-                let user = db::may_update(
-                    diesel::update(users.filter(users::id.eq(current.id)))
-                        .set(user_change)
-                        .get_result(conn),
-                )?.unwrap_or(current);
-
-                Ok(user)
-            })
+            Ok(user)
         })
     }
 }

@@ -16,13 +16,16 @@ pub struct Params {
 
 impl CanFeedArticles for Hub {}
 
-pub trait CanFeedArticles: db::HaveDb + CanBuildArticleList {
-    fn feed_articles(&self, user: &User, params: Params) -> Result<Vec<res::Article>> {
-        self.use_db(|conn| {
-            let author_ids = select_followed_authors(conn, user.id)?;
-            let articles = select_articles(conn, &author_ids, params)?;
-            self.build_article_list(conn, articles, Some(user))
-        })
+pub trait CanFeedArticles: CanBuildArticleList {
+    fn feed_articles(
+        &self,
+        conn: &db::Connection,
+        user: &User,
+        params: Params,
+    ) -> Result<Vec<res::Article>> {
+        let author_ids = select_followed_authors(conn, user.id)?;
+        let articles = select_articles(conn, &author_ids, params)?;
+        self.build_article_list(conn, articles, Some(user))
     }
 }
 

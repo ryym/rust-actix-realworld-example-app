@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 
 use super::SignupUser;
-use crate::db::HaveDb;
+use crate::db;
 use crate::hub::Hub;
 use crate::prelude::*;
 
@@ -20,15 +20,10 @@ impl ValidateSignup for Hub {}
 //   - length: 8..=72
 
 pub trait CanValidateSignup {
-    fn validate_signup(&self, form: &SignupUser) -> Result<()>;
-}
-
-pub trait ValidateSignup: HaveDb {}
-impl<T: ValidateSignup> CanValidateSignup for T {
     // XXX: We should implement some generic validation module
     // or find a crate to avoid manual if-else validation.
     // TODO: Implement all validations.
-    fn validate_signup(&self, form: &SignupUser) -> Result<()> {
+    fn validate_signup(&self, conn: &db::Connection, form: &SignupUser) -> Result<()> {
         use crate::schema::users::dsl::*;
         use diesel::dsl::{exists, select};
 
@@ -42,26 +37,22 @@ impl<T: ValidateSignup> CanValidateSignup for T {
         if name.len() > 20 {
             errs.push("username is too long (max 20 character)".to_owned());
         }
-        self.use_db(|conn| {
-            let found = select(exists(users.filter(username.eq(name)))).get_result(conn)?;
-            if found {
-                errs.push(format!("username {} already exists", name));
-            }
-            Ok(())
-        })?;
+
+        let found = select(exists(users.filter(username.eq(name)))).get_result(conn)?;
+        if found {
+            errs.push(format!("username {} already exists", name));
+        }
 
         // Email
         let form_email = form.email.trim();
         if form_email.is_empty() {
             errs.push("email can't be blank".to_owned());
         }
-        self.use_db(|conn| {
-            let found = select(exists(users.filter(email.eq(form_email)))).get_result(conn)?;
-            if found {
-                errs.push(format!("email {} already exists", form_email));
-            }
-            Ok(())
-        })?;
+
+        let found = select(exists(users.filter(email.eq(form_email)))).get_result(conn)?;
+        if found {
+            errs.push(format!("email {} already exists", form_email));
+        }
 
         if errs.is_empty() {
             Ok(())
@@ -70,3 +61,6 @@ impl<T: ValidateSignup> CanValidateSignup for T {
         }
     }
 }
+
+pub trait ValidateSignup {}
+impl<T: ValidateSignup> CanValidateSignup for T {}

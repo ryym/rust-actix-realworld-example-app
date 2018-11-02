@@ -30,10 +30,11 @@ pub fn get<S>(
     (hub, path, auth): (State<S>, Path<ProfilePath>, Option<Auth>),
 ) -> Result<Json<ProfileResponse>>
 where
-    S: CanFindProfile,
+    S: db::HaveDb + CanFindProfile,
 {
     let current_user = auth.map(|a| a.user);
-    let profile = hub.find_profile(&path.username, current_user.as_ref())?;
+    let profile =
+        hub.use_db(|conn| hub.find_profile(conn, &path.username, current_user.as_ref()))?;
     Ok(Json(ProfileResponse { profile }))
 }
 
@@ -41,9 +42,9 @@ pub fn follow<S>(
     (hub, path, auth): (State<S>, Path<ProfilePath>, Auth),
 ) -> Result<Json<ProfileResponse>>
 where
-    S: CanAddFollower,
+    S: db::HaveDb + CanAddFollower,
 {
-    let profile = hub.add_follower(&path.username, auth.user.id)?;
+    let profile = hub.use_db(|conn| hub.add_follower(conn, &path.username, auth.user.id))?;
     Ok(Json(ProfileResponse { profile }))
 }
 
@@ -51,8 +52,8 @@ pub fn unfollow<S>(
     (hub, path, auth): (State<S>, Path<ProfilePath>, Auth),
 ) -> Result<Json<ProfileResponse>>
 where
-    S: CanRemoveFollower,
+    S: db::HaveDb + CanRemoveFollower,
 {
-    let profile = hub.remove_follower(&path.username, auth.user.id)?;
+    let profile = hub.use_db(|conn| hub.remove_follower(conn, &path.username, auth.user.id))?;
     Ok(Json(ProfileResponse { profile }))
 }

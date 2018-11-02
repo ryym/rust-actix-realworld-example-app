@@ -2,7 +2,7 @@ use diesel::{self, prelude::*};
 
 use super::password::CanHashPassword;
 use super::SignupUser;
-use crate::db::{self, HaveDb};
+use crate::db;
 use crate::hub::Hub;
 use crate::mdl::{NewCredential, NewUser, User};
 use crate::prelude::*;
@@ -10,22 +10,18 @@ use crate::prelude::*;
 impl RegisterUser for Hub {}
 
 pub trait CanRegisterUser {
-    fn register_user(&self, form: &SignupUser) -> Result<User>;
+    fn register_user(&self, conn: &db::Connection, form: &SignupUser) -> Result<User>;
 }
 
-pub trait RegisterUser: HaveDb + CanHashPassword {}
+pub trait RegisterUser: CanHashPassword {}
 impl<T: RegisterUser> CanRegisterUser for T {
-    fn register_user(&self, form: &SignupUser) -> Result<User> {
-        let user = self.use_db(|conn| {
-            conn.transaction(|| {
-                let user = insert_user(conn, &form)?;
-                let password_hash = self.hash_password(&form.password)?;
-                insert_credential(conn, user.id, password_hash)?;
-                Ok(user)
-            })
-        })?;
-
-        Ok(user)
+    fn register_user(&self, conn: &db::Connection, form: &SignupUser) -> Result<User> {
+        conn.transaction(|| {
+            let user = insert_user(conn, &form)?;
+            let password_hash = self.hash_password(&form.password)?;
+            insert_credential(conn, user.id, password_hash)?;
+            Ok(user)
+        })
     }
 }
 

@@ -7,26 +7,27 @@ use crate::prelude::*;
 
 impl CanUnfavoriteArticle for Hub {}
 
-pub trait CanUnfavoriteArticle: db::HaveDb + CanGetArticle {
-    fn unfavorite_article(&self, user: &User, slug: &str) -> Result<res::Article> {
-        let article = self.use_db(|conn| {
-            use crate::schema::{articles, favorite_articles as fav_articles};
-            use diesel::{self, prelude::*};
+pub trait CanUnfavoriteArticle: CanGetArticle {
+    fn unfavorite_article(
+        &self,
+        conn: &db::Connection,
+        user: &User,
+        slug: &str,
+    ) -> Result<res::Article> {
+        use crate::schema::{articles, favorite_articles as fav_articles};
+        use diesel::{self, prelude::*};
 
-            let article = articles::table
-                .filter(articles::slug.eq(slug))
-                .get_result::<Article>(conn)?;
+        let article = articles::table
+            .filter(articles::slug.eq(slug))
+            .get_result::<Article>(conn)?;
 
-            diesel::delete(
-                fav_articles::table
-                    .filter(fav_articles::user_id.eq(user.id))
-                    .filter(fav_articles::article_id.eq(article.id)),
-            ).execute(conn)?;
-
-            Ok(article)
-        })?;
+        diesel::delete(
+            fav_articles::table
+                .filter(fav_articles::user_id.eq(user.id))
+                .filter(fav_articles::article_id.eq(article.id)),
+        ).execute(conn)?;
 
         // XXX: This queries the article again.
-        self.get_article(&article.slug, Some(user))
+        self.get_article(conn, &article.slug, Some(user))
     }
 }
