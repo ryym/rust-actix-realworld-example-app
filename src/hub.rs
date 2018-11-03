@@ -1,6 +1,7 @@
 use crate::config::{Config, HaveConfig};
 use crate::db;
 use crate::prelude::*;
+use std::rc::Rc;
 
 pub trait Store {
     type Svc;
@@ -8,13 +9,16 @@ pub trait Store {
 }
 
 pub struct AppStore {
-    config: Config,
+    config: Rc<Config>,
     db_pool: db::Pool,
 }
 
 impl AppStore {
     pub fn create(config: Config, db_pool: db::Pool) -> AppStore {
-        AppStore { config, db_pool }
+        AppStore {
+            config: Rc::new(config),
+            db_pool,
+        }
     }
 }
 
@@ -23,14 +27,14 @@ impl Store for AppStore {
     fn service(&self) -> Result<Self::Svc> {
         let conn = db::get_conn(&self.db_pool)?;
         Ok(Hub {
-            config: self.config.clone(),
+            config: Rc::clone(&self.config),
             conn,
         })
     }
 }
 
 pub struct Hub {
-    config: Config,
+    config: Rc<Config>,
     conn: db::PooledConn,
 }
 
