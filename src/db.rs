@@ -28,6 +28,10 @@ pub trait HaveDb {
         F: FnOnce(&Conn) -> Result<T>;
 }
 
+pub trait HaveConn {
+    fn conn(&self) -> &Conn;
+}
+
 /// Ignores diesel's `QueryBuilderError` silently. This error could occur when
 /// you run an update with a changeset whose all fields are `None`.
 /// In that case, this returns `Ok(None)`.

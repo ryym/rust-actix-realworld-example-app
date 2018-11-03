@@ -1,7 +1,7 @@
 //! This module provides utilities for unit tests.
 
-use crate::db;
 use crate::prelude::*;
+use crate::{db, hub};
 use diesel::Connection;
 
 // You need to run `diesel setup` before running unit tests.
@@ -27,15 +27,23 @@ pub fn init() -> Result<Test> {
     })
 }
 
-/// Implement HaveDb.
-macro_rules! impl_have_db {
+pub struct Store<S>(pub S);
+
+impl<S: Clone> hub::Store<S> for Store<S> {
+    fn hub(&self) -> Result<S> {
+        Ok(self.0.clone())
+    }
+}
+
+#[derive(Clone)]
+pub struct Mock {}
+
+/// Implement db::HaveConn.
+macro_rules! impl_have_conn {
     ($struct:ident($field:ident)) => {
-        impl db::HaveDb for $struct {
-            fn use_db<F, T>(&self, f: F) -> Result<T>
-            where
-                F: FnOnce(&db::Conn) -> Result<T>,
-            {
-                f(&self.$field)
+        impl db::HaveConn for $struct {
+            fn conn(&self) -> &db::Conn {
+                &self.$field
             }
         }
     };

@@ -1,14 +1,19 @@
 use crate::{db, hub::Hub, prelude::*};
 
-impl CanListTags for Hub {}
+impl ListTags for Hub {}
 
 pub trait CanListTags {
+    fn list_tags(&self) -> Result<Vec<String>>;
+}
+
+pub trait ListTags: db::HaveConn {}
+impl<T: ListTags> CanListTags for T {
     // XXX: The tags should be ordered by articles count.
-    fn list_tags(&self, conn: &db::Conn) -> Result<Vec<String>> {
+    fn list_tags(&self) -> Result<Vec<String>> {
         use crate::schema::article_tags::dsl::*;
         use diesel::prelude::*;
 
-        let tags = article_tags.select(tag_name).distinct().load(conn)?;
+        let tags = article_tags.select(tag_name).distinct().load(self.conn())?;
         Ok(tags)
     }
 }
@@ -17,7 +22,7 @@ pub trait CanListTags {
 mod test {
     use super::*;
     use crate::schema::{article_tags, articles, users};
-    use crate::{mdl, test};
+    use crate::{db, mdl, test};
     use diesel::prelude::*;
 
     #[test]
@@ -59,11 +64,13 @@ mod test {
             .values(&tags)
             .execute(&conn)?;
 
-        struct Mock {}
-        impl CanListTags for Mock {}
+        struct Mock {
+            conn: db::Conn,
+        }
+        impl_have_conn!(Mock(conn));
+        impl ListTags for Mock {}
 
-        let mock = Mock {};
-        let tags = mock.list_tags(&conn)?;
+        let tags = Mock { conn }.list_tags()?;
         assert_eq!(&tags, &["tag_a", "tag_b"]);
 
         Ok(())
