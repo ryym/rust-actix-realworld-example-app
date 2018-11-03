@@ -9,18 +9,29 @@ use crate::hub::Hub;
 use crate::mdl::{self, Article, User};
 use crate::prelude::*;
 
-impl CanUpdateArticle for Hub {}
+impl UpdateArticle for Hub {}
 
-pub trait CanUpdateArticle: CanSlugify + CanGetArticle + CanReplaceTags {
+pub trait CanUpdateArticle {
     fn update_article(
         &self,
-        conn: &db::Conn,
+        user: &User,
+        slug: &str,
+        change: ArticleChange,
+    ) -> Result<res::Article>;
+}
+
+pub trait UpdateArticle: db::HaveConn + CanSlugify + CanGetArticle + CanReplaceTags {}
+impl<T: UpdateArticle> CanUpdateArticle for T {
+    fn update_article(
+        &self,
         user: &User,
         slug: &str,
         change: ArticleChange,
     ) -> Result<res::Article> {
         use crate::schema::articles;
         use diesel::{self, prelude::*};
+
+        let conn = self.conn();
 
         let article = articles::table
             .filter(articles::slug.eq(slug))
@@ -31,7 +42,7 @@ pub trait CanUpdateArticle: CanSlugify + CanGetArticle + CanReplaceTags {
         }
 
         let tag_list = change.tag_list.unwrap_or(Vec::with_capacity(0));
-        self.replace_tags(conn, article.id, tag_list)?;
+        self.replace_tags(article.id, tag_list)?;
 
         let change = mdl::ArticleChange {
             slug: change.title.as_ref().map(|t| self.slugify(t)),
@@ -47,6 +58,6 @@ pub trait CanUpdateArticle: CanSlugify + CanGetArticle + CanReplaceTags {
         )?;
 
         // XXX: This queries the article again.
-        self.get_article(conn, &article.slug, Some(user))
+        self.get_article(&article.slug, Some(user))
     }
 }

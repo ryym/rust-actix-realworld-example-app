@@ -4,17 +4,19 @@ use crate::hub::Hub;
 use crate::mdl::{Article, User};
 use crate::prelude::*;
 
-impl CanGetArticle for Hub {}
+impl GetArticle for Hub {}
 
 pub trait CanGetArticle {
-    fn get_article(
-        &self,
-        conn: &db::Conn,
-        slug: &str,
-        current: Option<&User>,
-    ) -> Result<res::Article> {
+    fn get_article(&self, slug: &str, current: Option<&User>) -> Result<res::Article>;
+}
+
+pub trait GetArticle: db::HaveConn {}
+impl<T: GetArticle> CanGetArticle for T {
+    fn get_article(&self, slug: &str, current: Option<&User>) -> Result<res::Article> {
         use crate::schema::{articles, favorite_articles as fav_articles, users as authors};
         use diesel::prelude::*;
+
+        let conn = self.conn();
 
         let (article, author) = articles::table
             .inner_join(authors::table)

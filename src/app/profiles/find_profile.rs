@@ -8,17 +8,12 @@ use crate::prelude::*;
 
 impl CanFindProfile for Hub {}
 
-pub trait CanFindProfile {
-    fn find_profile(
-        &self,
-        conn: &db::Conn,
-        username: &str,
-        current: Option<&User>,
-    ) -> Result<Profile> {
-        let user = find_user(conn, username)?;
+pub trait CanFindProfile: db::HaveConn {
+    fn find_profile(&self, username: &str, current: Option<&User>) -> Result<Profile> {
+        let user = find_user(self.conn(), username)?;
         let following = match current {
             None => false,
-            Some(current) => is_follower(conn, user.id, current.id)?,
+            Some(current) => is_follower(self.conn(), user.id, current.id)?,
         };
 
         Ok(Profile::from_user(user, following))

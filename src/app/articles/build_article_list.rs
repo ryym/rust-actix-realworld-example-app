@@ -7,12 +7,21 @@ use crate::hub::Hub;
 use crate::mdl::{Article, User};
 use crate::prelude::*;
 
-impl CanBuildArticleList for Hub {}
+impl BuildArticleList for Hub {}
 
 pub trait CanBuildArticleList {
     fn build_article_list(
         &self,
-        conn: &db::Conn,
+        articles: Vec<(Article, User)>,
+        user: Option<&User>,
+    ) -> Result<Vec<res::Article>>;
+}
+
+pub trait BuildArticleList: db::HaveConn {}
+
+impl<T: BuildArticleList> CanBuildArticleList for T {
+    fn build_article_list(
+        &self,
         articles: Vec<(Article, User)>,
         user: Option<&User>,
     ) -> Result<Vec<res::Article>> {
@@ -20,11 +29,14 @@ pub trait CanBuildArticleList {
             articles.iter().map(|(a, u)| (a.id, u.id)).unzip();
 
         let (favorites, followings, fav_counts) = match user {
-            Some(user) => (
-                select_favorites(conn, user.id, &article_ids)?,
-                select_followings(conn, user.id, &author_ids)?,
-                select_favorite_counts(conn, &article_ids)?,
-            ),
+            Some(user) => {
+                let conn = self.conn();
+                (
+                    select_favorites(conn, user.id, &article_ids)?,
+                    select_followings(conn, user.id, &author_ids)?,
+                    select_favorite_counts(conn, &article_ids)?,
+                )
+            }
             None => (
                 HashSet::with_capacity(0),
                 HashSet::with_capacity(0),

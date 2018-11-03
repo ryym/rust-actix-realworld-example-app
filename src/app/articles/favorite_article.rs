@@ -5,12 +5,19 @@ use crate::hub::Hub;
 use crate::mdl::{Article, NewFavoriteArticle, User};
 use crate::prelude::*;
 
-impl CanFavoriteArticle for Hub {}
+impl FavoriteArticle for Hub {}
 
-pub trait CanFavoriteArticle: CanGetArticle {
-    fn favorite_article(&self, conn: &db::Conn, user: &User, slug: &str) -> Result<res::Article> {
+pub trait CanFavoriteArticle {
+    fn favorite_article(&self, user: &User, slug: &str) -> Result<res::Article>;
+}
+
+pub trait FavoriteArticle: db::HaveConn + CanGetArticle {}
+impl<T: FavoriteArticle> CanFavoriteArticle for T {
+    fn favorite_article(&self, user: &User, slug: &str) -> Result<res::Article> {
         use crate::schema::{articles, favorite_articles as fav_articles};
         use diesel::{self, prelude::*};
+
+        let conn = self.conn();
 
         let article = articles::table
             .filter(articles::slug.eq(slug))
@@ -27,6 +34,6 @@ pub trait CanFavoriteArticle: CanGetArticle {
             .execute(conn)?;
 
         // XXX: This queries the article again.
-        self.get_article(conn, &article.slug, Some(user))
+        self.get_article(&article.slug, Some(user))
     }
 }

@@ -14,7 +14,7 @@ use self::{
 };
 use super::res::{User, UserResponse};
 use crate::auth::Auth;
-use crate::db::HaveDb;
+use crate::hub::Store;
 use crate::jwt::CanGenerateJwt;
 use crate::mdl;
 use crate::prelude::*;
@@ -46,28 +46,33 @@ pub struct UserChange {
     pub password: Option<String>,
 }
 
-pub fn sign_up<S>((form, hub): (Json<In<SignupUser>>, State<S>)) -> Result<Json<UserResponse>>
+pub fn sign_up<S>(
+    (form, store): (Json<In<SignupUser>>, State<impl Store<S>>),
+) -> Result<Json<UserResponse>>
 where
-    S: HaveDb + CanValidateSignup + CanRegisterUser + CanGenerateJwt,
+    S: CanValidateSignup + CanRegisterUser + CanGenerateJwt,
 {
-    let form = form.into_inner().user;
+    let hub = store.hub()?;
 
-    let user = hub.use_db(|conn| {
-        hub.validate_signup(conn, &form)?;
-        hub.register_user(conn, &form)
-    })?;
+    let form = form.into_inner().user;
+    hub.validate_signup(&form)?;
+
+    let user = hub.register_user(&form)?;
     let token = hub.generate_jwt(user.id)?;
 
     let user = User::from_model(token, user);
     Ok(Json(UserResponse { user }))
 }
 
-pub fn sign_in<S>((form, hub): (Json<In<SigninUser>>, State<S>)) -> Result<Json<UserResponse>>
+pub fn sign_in<S>(
+    (form, store): (Json<In<SigninUser>>, State<impl Store<S>>),
+) -> Result<Json<UserResponse>>
 where
-    S: HaveDb + CanAuthenticate + CanGenerateJwt,
+    S: CanAuthenticate + CanGenerateJwt,
 {
+    let hub = store.hub()?;
     let form = form.into_inner().user;
-    let user = hub.use_db(|conn| hub.authenticate(conn, &form))?;
+    let user = hub.authenticate(&form)?;
     let token = hub.generate_jwt(user.id)?;
 
     let user = User::from_model(token, user);
@@ -80,30 +85,28 @@ pub fn get_current(auth: Auth) -> Result<Json<UserResponse>> {
 }
 
 pub fn update<S>(
-    (hub, form, auth): (State<S>, Json<In<UserChange>>, Auth),
+    (store, form, auth): (State<impl Store<S>>, Json<In<UserChange>>, Auth),
 ) -> Result<Json<UserResponse>>
 where
-    S: HaveDb + CanUpdateUser,
+    S: CanUpdateUser,
 {
     // TODO: Validate input.
     let form = form.into_inner().user;
 
-    hub.use_db(|conn| {
-        let user = hub.update_user(
-            &conn,
-            auth.user,
-            UserChanges {
-                user: mdl::UserChange {
-                    username: form.username,
-                    email: form.email,
-                    bio: Some(form.bio),
-                    image: Some(form.image),
-                },
-                new_password: form.password,
+    let hub = store.hub()?;
+    let user = hub.update_user(
+        auth.user,
+        UserChanges {
+            user: mdl::UserChange {
+                username: form.username,
+                email: form.email,
+                bio: Some(form.bio),
+                image: Some(form.image),
             },
-        )?;
+            new_password: form.password,
+        },
+    )?;
 
-        let user = User::from_model(auth.token, user);
-        Ok(Json(UserResponse { user }))
-    })
+    let user = User::from_model(auth.token, user);
+    Ok(Json(UserResponse { user }))
 }

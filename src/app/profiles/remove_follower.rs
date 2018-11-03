@@ -5,15 +5,10 @@ use crate::prelude::*;
 
 impl CanRemoveFollower for Hub {}
 
-pub trait CanRemoveFollower {
-    fn remove_follower(
-        &self,
-        conn: &db::Conn,
-        username: &str,
-        follower_id: i32,
-    ) -> Result<Profile> {
-        let user = find_user(conn, username)?;
-        delete_follower(conn, user.id, follower_id)?;
+pub trait CanRemoveFollower: db::HaveConn {
+    fn remove_follower(&self, username: &str, follower_id: i32) -> Result<Profile> {
+        let user = find_user(self.conn(), username)?;
+        delete_follower(self.conn(), user.id, follower_id)?;
         Ok(Profile::from_user(user, false))
     }
 }

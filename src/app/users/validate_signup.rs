@@ -20,10 +20,15 @@ impl ValidateSignup for Hub {}
 //   - length: 8..=72
 
 pub trait CanValidateSignup {
+    fn validate_signup(&self, form: &SignupUser) -> Result<()>;
+}
+
+pub trait ValidateSignup: db::HaveConn + CanValidateSignup {}
+impl<T: ValidateSignup> CanValidateSignup for T {
     // XXX: We should implement some generic validation module
     // or find a crate to avoid manual if-else validation.
     // TODO: Implement all validations.
-    fn validate_signup(&self, conn: &db::Conn, form: &SignupUser) -> Result<()> {
+    fn validate_signup(&self, form: &SignupUser) -> Result<()> {
         use crate::schema::users::dsl::*;
         use diesel::dsl::{exists, select};
 
@@ -38,7 +43,7 @@ pub trait CanValidateSignup {
             errs.push("username is too long (max 20 character)".to_owned());
         }
 
-        let found = select(exists(users.filter(username.eq(name)))).get_result(conn)?;
+        let found = select(exists(users.filter(username.eq(name)))).get_result(self.conn())?;
         if found {
             errs.push(format!("username {} already exists", name));
         }
@@ -49,7 +54,7 @@ pub trait CanValidateSignup {
             errs.push("email can't be blank".to_owned());
         }
 
-        let found = select(exists(users.filter(email.eq(form_email)))).get_result(conn)?;
+        let found = select(exists(users.filter(email.eq(form_email)))).get_result(self.conn())?;
         if found {
             errs.push(format!("email {} already exists", form_email));
         }
@@ -61,6 +66,3 @@ pub trait CanValidateSignup {
         }
     }
 }
-
-pub trait ValidateSignup {}
-impl<T: ValidateSignup> CanValidateSignup for T {}

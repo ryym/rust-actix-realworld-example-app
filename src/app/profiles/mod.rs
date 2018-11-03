@@ -10,6 +10,7 @@ use self::remove_follower::CanRemoveFollower;
 use super::res::{Profile, ProfileResponse};
 use crate::auth::Auth;
 use crate::db;
+use crate::hub::Store;
 use crate::mdl::User;
 use crate::prelude::*;
 
@@ -27,33 +28,33 @@ pub struct ProfilePath {
 }
 
 pub fn get<S>(
-    (hub, path, auth): (State<S>, Path<ProfilePath>, Option<Auth>),
+    (store, path, auth): (State<impl Store<S>>, Path<ProfilePath>, Option<Auth>),
 ) -> Result<Json<ProfileResponse>>
 where
-    S: db::HaveDb + CanFindProfile,
+    S: CanFindProfile,
 {
+    let hub = store.hub()?;
     let current_user = auth.map(|a| a.user);
-    let profile =
-        hub.use_db(|conn| hub.find_profile(conn, &path.username, current_user.as_ref()))?;
+    let profile = hub.find_profile(&path.username, current_user.as_ref())?;
     Ok(Json(ProfileResponse { profile }))
 }
 
 pub fn follow<S>(
-    (hub, path, auth): (State<S>, Path<ProfilePath>, Auth),
+    (store, path, auth): (State<impl Store<S>>, Path<ProfilePath>, Auth),
 ) -> Result<Json<ProfileResponse>>
 where
-    S: db::HaveDb + CanAddFollower,
+    S: CanAddFollower,
 {
-    let profile = hub.use_db(|conn| hub.add_follower(conn, &path.username, auth.user.id))?;
+    let profile = store.hub()?.add_follower(&path.username, auth.user.id)?;
     Ok(Json(ProfileResponse { profile }))
 }
 
 pub fn unfollow<S>(
-    (hub, path, auth): (State<S>, Path<ProfilePath>, Auth),
+    (store, path, auth): (State<impl Store<S>>, Path<ProfilePath>, Auth),
 ) -> Result<Json<ProfileResponse>>
 where
-    S: db::HaveDb + CanRemoveFollower,
+    S: CanRemoveFollower,
 {
-    let profile = hub.use_db(|conn| hub.remove_follower(conn, &path.username, auth.user.id))?;
+    let profile = store.hub()?.remove_follower(&path.username, auth.user.id)?;
     Ok(Json(ProfileResponse { profile }))
 }

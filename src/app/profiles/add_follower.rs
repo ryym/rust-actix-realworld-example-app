@@ -8,16 +8,16 @@ use crate::prelude::*;
 
 impl CanAddFollower for Hub {}
 
-pub trait CanAddFollower {
-    fn add_follower(&self, conn: &db::Conn, username: &str, follower_id: i32) -> Result<Profile> {
-        let user = find_user(conn, username)?;
+pub trait CanAddFollower: db::HaveConn {
+    fn add_follower(&self, username: &str, follower_id: i32) -> Result<Profile> {
+        let user = find_user(self.conn(), username)?;
 
         if user.id == follower_id {
             let msg = "You cannot follow yourself".to_owned();
             return Err(ErrorKind::Validation(vec![msg]).into());
         }
 
-        insert_follower(conn, &user, follower_id)?;
+        insert_follower(self.conn(), &user, follower_id)?;
         Ok(Profile::from_user(user, true))
     }
 }

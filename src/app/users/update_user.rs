@@ -12,12 +12,12 @@ pub struct UserChanges {
 }
 
 pub trait CanUpdateUser {
-    fn update_user(&self, conn: &db::Conn, current: User, change: UserChanges) -> Result<User>;
+    fn update_user(&self, current: User, change: UserChanges) -> Result<User>;
 }
 
-pub trait UpdateUser: CanHashPassword {}
+pub trait UpdateUser: db::HaveConn + CanHashPassword {}
 impl<T: UpdateUser> CanUpdateUser for T {
-    fn update_user(&self, conn: &db::Conn, current: User, change: UserChanges) -> Result<User> {
+    fn update_user(&self, current: User, change: UserChanges) -> Result<User> {
         use crate::schema::{
             credentials::dsl::*,
             users::{self, dsl::*},
@@ -39,6 +39,7 @@ impl<T: UpdateUser> CanUpdateUser for T {
             },
         };
 
+        let conn = self.conn();
         conn.transaction(|| {
             db::may_update(
                 diesel::update(credentials.filter(user_id.eq(current.id)))

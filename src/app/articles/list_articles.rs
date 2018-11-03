@@ -8,7 +8,7 @@ use crate::hub::Hub;
 use crate::mdl::{Article, User};
 use crate::prelude::*;
 
-impl CanListArticles for Hub {}
+impl ListArticles for Hub {}
 
 #[derive(Debug, Deserialize)]
 pub struct Params {
@@ -19,15 +19,15 @@ pub struct Params {
     offset: Option<u32>,
 }
 
-pub trait CanListArticles: CanBuildArticleList {
-    fn list_articles(
-        &self,
-        conn: &db::Conn,
-        params: Params,
-        user: Option<&User>,
-    ) -> Result<Vec<res::Article>> {
-        let articles = search_articles(conn, params)?;
-        self.build_article_list(conn, articles, user)
+pub trait CanListArticles {
+    fn list_articles(&self, params: Params, user: Option<&User>) -> Result<Vec<res::Article>>;
+}
+
+pub trait ListArticles: db::HaveConn + CanBuildArticleList {}
+impl<T: ListArticles> CanListArticles for T {
+    fn list_articles(&self, params: Params, user: Option<&User>) -> Result<Vec<res::Article>> {
+        let articles = search_articles(self.conn(), params)?;
+        self.build_article_list(articles, user)
     }
 }
 

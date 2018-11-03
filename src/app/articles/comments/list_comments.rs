@@ -5,16 +5,18 @@ use crate::app::res;
 use crate::mdl::{Comment, User};
 use crate::{db, hub::Hub, prelude::*};
 
-impl CanListComments for Hub {}
+impl ListComments for Hub {}
 
 pub trait CanListComments {
-    fn list_comments(
-        &self,
-        conn: &db::Conn,
-        slug: &str,
-        user: Option<&User>,
-    ) -> Result<Vec<res::Comment>> {
+    fn list_comments(&self, slug: &str, user: Option<&User>) -> Result<Vec<res::Comment>>;
+}
+
+pub trait ListComments: db::HaveConn {}
+impl<T: ListComments> CanListComments for T {
+    fn list_comments(&self, slug: &str, user: Option<&User>) -> Result<Vec<res::Comment>> {
         use crate::schema::{articles, comments, users};
+
+        let conn = self.conn();
 
         let article_id = articles::table
             .filter(articles::slug.eq(slug))

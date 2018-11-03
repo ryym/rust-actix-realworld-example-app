@@ -7,19 +7,19 @@ use crate::prelude::*;
 impl Authenticate for Hub {}
 
 pub trait CanAuthenticate {
-    fn authenticate(&self, conn: &db::Conn, form: &SigninUser) -> Result<User>;
+    fn authenticate(&self, form: &SigninUser) -> Result<User>;
 }
 
-pub trait Authenticate: CanCheckPassword {}
+pub trait Authenticate: db::HaveConn + CanCheckPassword {}
 impl<T: Authenticate> CanAuthenticate for T {
-    fn authenticate(&self, conn: &db::Conn, form: &SigninUser) -> Result<User> {
+    fn authenticate(&self, form: &SigninUser) -> Result<User> {
         use crate::schema::{credentials::dsl::*, users::dsl::*};
         use diesel::prelude::*;
 
         let user_cred = users
             .inner_join(credentials)
             .filter(email.eq(&form.email))
-            .first::<(User, Credential)>(conn)
+            .first::<(User, Credential)>(self.conn())
             .optional()?;
 
         if let Some((user, cred)) = user_cred {

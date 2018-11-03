@@ -1,15 +1,14 @@
 use crate::{db, hub::Hub, mdl::User, prelude::*};
 
-impl CanDeleteComment for Hub {}
+impl DeleteComment for Hub {}
 
 pub trait CanDeleteComment {
-    fn delete_comment(
-        &self,
-        conn: &db::Conn,
-        slug: &str,
-        author: &User,
-        comment_id: i32,
-    ) -> Result<()> {
+    fn delete_comment(&self, slug: &str, author: &User, comment_id: i32) -> Result<()>;
+}
+
+pub trait DeleteComment: db::HaveConn {}
+impl<T: DeleteComment> CanDeleteComment for T {
+    fn delete_comment(&self, slug: &str, author: &User, comment_id: i32) -> Result<()> {
         use crate::schema::{articles, comments};
         use diesel::prelude::*;
 
@@ -22,9 +21,9 @@ pub trait CanDeleteComment {
             .filter(comments::id.eq(comment_id))
             .filter(comments::user_id.eq(author.id))
             .select(comments::id)
-            .get_result::<i32>(conn)?;
+            .get_result::<i32>(self.conn())?;
 
-        diesel::delete(comments::table.filter(comments::id.eq(comment_id))).execute(conn)?;
+        diesel::delete(comments::table.filter(comments::id.eq(comment_id))).execute(self.conn())?;
 
         Ok(())
     }

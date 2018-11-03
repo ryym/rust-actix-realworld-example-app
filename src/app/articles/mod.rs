@@ -26,7 +26,7 @@ use self::unfavorite_article::CanUnfavoriteArticle;
 use self::update_article::CanUpdateArticle;
 use super::res::{ArticleListResponse, ArticleResponse};
 use crate::auth::Auth;
-use crate::db;
+use crate::hub::Store;
 use crate::prelude::*;
 
 #[derive(Debug, Deserialize)]
@@ -53,84 +53,94 @@ pub struct ArticleChange {
 }
 
 pub fn create<S>(
-    (hub, auth, form): (State<S>, Auth, Json<In<NewArticle>>),
+    (store, auth, form): (State<impl Store<S>>, Auth, Json<In<NewArticle>>),
 ) -> Result<Json<ArticleResponse>>
 where
-    S: db::HaveDb + CanCreateArticle,
+    S: CanCreateArticle,
 {
     let new_article = form.into_inner().article;
-    let article = hub.use_db(|conn| hub.create_article(conn, auth.user, new_article))?;
+    let article = store.hub()?.create_article(auth.user, new_article)?;
     Ok(Json(ArticleResponse { article }))
 }
 
 pub fn get<S>(
-    (hub, auth, slug): (State<S>, Option<Auth>, Path<String>),
+    (store, auth, slug): (State<impl Store<S>>, Option<Auth>, Path<String>),
 ) -> Result<Json<ArticleResponse>>
 where
-    S: db::HaveDb + CanGetArticle,
+    S: CanGetArticle,
 {
     let user = auth.map(|a| a.user);
-    let article = hub.use_db(|conn| hub.get_article(conn, &slug, user.as_ref()))?;
+    let article = store.hub()?.get_article(&slug, user.as_ref())?;
     Ok(Json(ArticleResponse { article }))
 }
 
 pub fn update<S>(
-    (hub, auth, slug, form): (State<S>, Auth, Path<String>, Json<In<ArticleChange>>),
+    (store, auth, slug, form): (
+        State<impl Store<S>>,
+        Auth,
+        Path<String>,
+        Json<In<ArticleChange>>,
+    ),
 ) -> Result<Json<ArticleResponse>>
 where
-    S: db::HaveDb + CanUpdateArticle,
+    S: CanUpdateArticle,
 {
     let change = form.into_inner().article;
-    let article = hub.use_db(|conn| hub.update_article(conn, &auth.user, &slug, change))?;
+    let article = store.hub()?.update_article(&auth.user, &slug, change)?;
     Ok(Json(ArticleResponse { article }))
 }
 
-pub fn delete<S>((hub, auth, slug): (State<S>, Auth, Path<String>)) -> Result<Json<()>>
+pub fn delete<S>(
+    (store, auth, slug): (State<impl Store<S>>, Auth, Path<String>),
+) -> Result<Json<()>>
 where
-    S: db::HaveDb + CanDeleteArticle,
+    S: CanDeleteArticle,
 {
-    hub.use_db(|conn| hub.delete_article(conn, &auth.user, &slug))?;
+    store.hub()?.delete_article(&auth.user, &slug)?;
     Ok(Json(()))
 }
 
 pub fn favorite<S>(
-    (hub, auth, slug): (State<S>, Auth, Path<String>),
+    (store, auth, slug): (State<impl Store<S>>, Auth, Path<String>),
 ) -> Result<Json<ArticleResponse>>
 where
-    S: db::HaveDb + CanFavoriteArticle,
+    S: CanFavoriteArticle,
 {
-    let article = hub.use_db(|conn| hub.favorite_article(conn, &auth.user, &slug))?;
+    let article = store.hub()?.favorite_article(&auth.user, &slug)?;
     Ok(Json(ArticleResponse { article }))
 }
 
 pub fn unfavorite<S>(
-    (hub, auth, slug): (State<S>, Auth, Path<String>),
+    (store, auth, slug): (State<impl Store<S>>, Auth, Path<String>),
 ) -> Result<Json<ArticleResponse>>
 where
-    S: db::HaveDb + CanUnfavoriteArticle,
+    S: CanUnfavoriteArticle,
 {
-    let article = hub.use_db(|conn| hub.unfavorite_article(conn, &auth.user, &slug))?;
+    let article = store.hub()?.unfavorite_article(&auth.user, &slug)?;
     Ok(Json(ArticleResponse { article }))
 }
 
 pub fn list<S>(
-    (hub, auth, params): (State<S>, Option<Auth>, Query<Params>),
+    (store, auth, params): (State<impl Store<S>>, Option<Auth>, Query<Params>),
 ) -> Result<Json<ArticleListResponse>>
 where
-    S: db::HaveDb + CanListArticles,
+    S: CanListArticles,
 {
     let user = auth.map(|a| a.user);
-    let articles =
-        hub.use_db(|conn| hub.list_articles(conn, params.into_inner(), user.as_ref()))?;
+    let articles = store
+        .hub()?
+        .list_articles(params.into_inner(), user.as_ref())?;
     Ok(Json(ArticleListResponse::new(articles)))
 }
 
 pub fn feed<S>(
-    (hub, auth, params): (State<S>, Auth, Query<FeedParams>),
+    (store, auth, params): (State<impl Store<S>>, Auth, Query<FeedParams>),
 ) -> Result<Json<ArticleListResponse>>
 where
-    S: db::HaveDb + CanFeedArticles,
+    S: CanFeedArticles,
 {
-    let articles = hub.use_db(|conn| hub.feed_articles(conn, &auth.user, params.into_inner()))?;
+    let articles = store
+        .hub()?
+        .feed_articles(&auth.user, params.into_inner())?;
     Ok(Json(ArticleListResponse::new(articles)))
 }

@@ -5,12 +5,19 @@ use crate::hub::Hub;
 use crate::mdl::{Article, User};
 use crate::prelude::*;
 
-impl CanUnfavoriteArticle for Hub {}
+impl UnfavoriteArticle for Hub {}
 
-pub trait CanUnfavoriteArticle: CanGetArticle {
-    fn unfavorite_article(&self, conn: &db::Conn, user: &User, slug: &str) -> Result<res::Article> {
+pub trait CanUnfavoriteArticle {
+    fn unfavorite_article(&self, user: &User, slug: &str) -> Result<res::Article>;
+}
+
+pub trait UnfavoriteArticle: db::HaveConn + CanGetArticle {}
+impl<T: UnfavoriteArticle> CanUnfavoriteArticle for T {
+    fn unfavorite_article(&self, user: &User, slug: &str) -> Result<res::Article> {
         use crate::schema::{articles, favorite_articles as fav_articles};
         use diesel::{self, prelude::*};
+
+        let conn = self.conn();
 
         let article = articles::table
             .filter(articles::slug.eq(slug))
@@ -23,6 +30,6 @@ pub trait CanUnfavoriteArticle: CanGetArticle {
         ).execute(conn)?;
 
         // XXX: This queries the article again.
-        self.get_article(conn, &article.slug, Some(user))
+        self.get_article(&article.slug, Some(user))
     }
 }

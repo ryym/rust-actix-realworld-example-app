@@ -10,12 +10,13 @@ use crate::prelude::*;
 impl RegisterUser for Hub {}
 
 pub trait CanRegisterUser {
-    fn register_user(&self, conn: &db::Conn, form: &SignupUser) -> Result<User>;
+    fn register_user(&self, form: &SignupUser) -> Result<User>;
 }
 
-pub trait RegisterUser: CanHashPassword {}
+pub trait RegisterUser: db::HaveConn + CanHashPassword {}
 impl<T: RegisterUser> CanRegisterUser for T {
-    fn register_user(&self, conn: &db::Conn, form: &SignupUser) -> Result<User> {
+    fn register_user(&self, form: &SignupUser) -> Result<User> {
+        let conn = self.conn();
         conn.transaction(|| {
             let user = insert_user(conn, &form)?;
             let password_hash = self.hash_password(&form.password)?;
