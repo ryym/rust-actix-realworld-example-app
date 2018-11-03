@@ -72,8 +72,8 @@ pub fn run() -> Result<(), error::Error> {
     log::info!("Starting server at 127.0.0.1:{}", port);
 
     server::new(move || {
-        let hub = hub::Hub::create(config.clone(), db_pool.clone());
-        app::create(hub, &config)
+        let store = hub::AppStore::create(config.clone(), db_pool.clone());
+        app::create(store, &config)
     }).bind(format!("127.0.0.1:{}", port))
     .expect("start server")
     .run();

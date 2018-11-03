@@ -2,7 +2,7 @@ use actix_web::{http::header::AUTHORIZATION, FromRequest, HttpRequest};
 
 use crate::db;
 use crate::error::ErrorKindAuth;
-use crate::hub::Hub;
+use crate::hub::{Hub, Store};
 use crate::jwt::{CanDecodeJwt, Decoded, Payload};
 use crate::mdl::User;
 use crate::prelude::*;
@@ -61,14 +61,14 @@ pub struct Auth {
     pub token: String,
 }
 
-impl<S> FromRequest<S> for Auth
-where
-    S: CanAuthenticate,
-{
+// XXX: We cannot use trait bound for the content of Store.
+// Should we use associated type instead...?
+// https://users.rust-lang.org/t/need-help-with-unconstrained-type-parameter/13173
+impl<S: Store<Hub>> FromRequest<S> for Auth {
     type Config = ();
     type Result = Result<Self>;
 
     fn from_request(req: &HttpRequest<S>, _cfg: &Self::Config) -> Self::Result {
-        req.state().authenticate(req)
+        req.state().hub()?.authenticate(req)
     }
 }

@@ -5,7 +5,7 @@ use actix_web::{
 };
 
 use crate::config::Config;
-use crate::hub::Hub;
+use crate::hub::AppStore;
 
 mod articles;
 mod error;
@@ -14,12 +14,12 @@ mod res;
 mod tags;
 mod users;
 
-fn index(_req: &HttpRequest<Hub>) -> &'static str {
+fn index(_req: &HttpRequest<AppStore>) -> &'static str {
     "Hello world!"
 }
 
-pub fn create(hub: Hub, conf: &Config) -> App<Hub> {
-    App::with_state(hub)
+pub fn create(store: AppStore, conf: &Config) -> App<AppStore> {
+    App::with_state(store)
         .middleware(Logger::default())
         .middleware(ErrorHandlers::new().handler(StatusCode::NOT_FOUND, error::not_found))
         .resource("/", |r| r.f(index))
