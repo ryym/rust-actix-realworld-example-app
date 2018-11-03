@@ -5,7 +5,7 @@ use crate::db;
 use crate::mdl::User;
 use crate::prelude::*;
 
-add_hub_trait!(CanFindProfile);
+register_service!(CanFindProfile);
 
 pub trait CanFindProfile: db::HaveConn {
     fn find_profile(&self, username: &str, current: Option<&User>) -> Result<Profile> {

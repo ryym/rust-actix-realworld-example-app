@@ -4,7 +4,7 @@ use super::SignupUser;
 use crate::db;
 use crate::prelude::*;
 
-add_hub_trait!(ValidateSignup);
+register_service!(ValidateSignup);
 
 // username
 //  - length: 1..=20

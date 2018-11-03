@@ -50,15 +50,8 @@ impl db::HaveConn for Hub {
     }
 }
 
-/// This trait is a kind of marker trait.
-/// You can implement many service functionalities just by
-/// implementing this trait. This allows us to
-/// use different structs as a concrete type of services.
-pub trait HubCore: HaveConfig {}
-impl HubCore for Hub {}
-
-macro_rules! add_hub_trait {
+macro_rules! register_service {
     ($trait:ident) => {
-        impl<T: crate::hub::HubCore + crate::db::HaveConn> $trait for T {}
+        impl $trait for crate::hub::Hub {}
     };
 }

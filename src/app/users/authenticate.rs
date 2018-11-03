@@ -3,7 +3,7 @@ use crate::db;
 use crate::mdl::{Credential, User};
 use crate::prelude::*;
 
-add_hub_trait!(Authenticate);
+register_service!(Authenticate);
 
 pub trait CanAuthenticate {
     fn authenticate(&self, form: &SigninUser) -> Result<User>;

@@ -1,6 +1,6 @@
 use crate::{db, mdl::User, prelude::*};
 
-add_hub_trait!(DeleteComment);
+register_service!(DeleteComment);
 
 pub trait CanDeleteComment {
     fn delete_comment(&self, slug: &str, author: &User, comment_id: i32) -> Result<()>;

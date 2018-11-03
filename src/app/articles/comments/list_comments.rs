@@ -5,7 +5,7 @@ use crate::app::res;
 use crate::mdl::{Comment, User};
 use crate::{db, prelude::*};
 
-add_hub_trait!(ListComments);
+register_service!(ListComments);
 
 pub trait CanListComments {
     fn list_comments(&self, slug: &str, user: Option<&User>) -> Result<Vec<res::Comment>>;

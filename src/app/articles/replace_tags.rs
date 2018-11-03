@@ -1,7 +1,7 @@
 use crate::mdl::NewArticleTag;
 use crate::{db, prelude::*};
 
-add_hub_trait!(ReplaceTags);
+register_service!(ReplaceTags);
 
 pub trait CanReplaceTags {
     fn replace_tags(&self, article_id: i32, tags: Vec<String>) -> Result<Vec<String>>;

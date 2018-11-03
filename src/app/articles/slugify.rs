@@ -1,7 +1,7 @@
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use std::iter;
 
-add_hub_trait!(CanSlugify);
+register_service!(CanSlugify);
 
 pub trait CanSlugify {
     // TODO: Implement better conversion.

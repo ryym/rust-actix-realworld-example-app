@@ -5,7 +5,7 @@ use crate::db;
 use crate::mdl::{NewFollower, User};
 use crate::prelude::*;
 
-add_hub_trait!(CanAddFollower);
+register_service!(CanAddFollower);
 
 pub trait CanAddFollower: db::HaveConn {
     fn add_follower(&self, username: &str, follower_id: i32) -> Result<Profile> {

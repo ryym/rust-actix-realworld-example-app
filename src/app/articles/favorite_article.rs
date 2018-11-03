@@ -4,7 +4,7 @@ use crate::db;
 use crate::mdl::{Article, NewFavoriteArticle, User};
 use crate::prelude::*;
 
-add_hub_trait!(FavoriteArticle);
+register_service!(FavoriteArticle);
 
 pub trait CanFavoriteArticle {
     fn favorite_article(&self, user: &User, slug: &str) -> Result<res::Article>;

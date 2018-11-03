@@ -8,7 +8,7 @@ use crate::error::ErrorKindAuth;
 use crate::mdl::{self, Article, User};
 use crate::prelude::*;
 
-add_hub_trait!(UpdateArticle);
+register_service!(UpdateArticle);
 
 pub trait CanUpdateArticle {
     fn update_article(

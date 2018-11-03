@@ -6,7 +6,7 @@ use crate::db;
 use crate::mdl::{NewCredential, NewUser, User};
 use crate::prelude::*;
 
-add_hub_trait!(RegisterUser);
+register_service!(RegisterUser);
 
 pub trait CanRegisterUser {
     fn register_user(&self, form: &SignupUser) -> Result<User>;

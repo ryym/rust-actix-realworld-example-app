@@ -4,7 +4,7 @@ use crate::db;
 use crate::mdl::{self, Comment, User};
 use crate::prelude::*;
 
-add_hub_trait!(AddComment);
+register_service!(AddComment);
 
 pub trait CanAddComment {
     fn add_comment(&self, slug: &str, author: User, comment: NewComment) -> Result<res::Comment>;

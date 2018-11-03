@@ -3,7 +3,7 @@ use crate::db;
 use crate::mdl::{Article, User};
 use crate::prelude::*;
 
-add_hub_trait!(GetArticle);
+register_service!(GetArticle);
 
 pub trait CanGetArticle {
     fn get_article(&self, slug: &str, current: Option<&User>) -> Result<res::Article>;

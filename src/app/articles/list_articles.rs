@@ -7,7 +7,7 @@ use crate::db;
 use crate::mdl::{Article, User};
 use crate::prelude::*;
 
-add_hub_trait!(ListArticles);
+register_service!(ListArticles);
 
 #[derive(Debug, Deserialize)]
 pub struct Params {

@@ -6,7 +6,7 @@ use crate::db;
 use crate::mdl::{Article, User};
 use crate::prelude::*;
 
-add_hub_trait!(BuildArticleList);
+register_service!(BuildArticleList);
 
 pub trait CanBuildArticleList {
     fn build_article_list(

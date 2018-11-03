@@ -4,7 +4,7 @@ use crate::db;
 use crate::mdl::{Article, User};
 use crate::prelude::*;
 
-add_hub_trait!(UnfavoriteArticle);
+register_service!(UnfavoriteArticle);
 
 pub trait CanUnfavoriteArticle {
     fn unfavorite_article(&self, user: &User, slug: &str) -> Result<res::Article>;

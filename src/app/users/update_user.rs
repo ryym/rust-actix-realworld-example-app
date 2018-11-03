@@ -3,7 +3,7 @@ use crate::db;
 use crate::mdl::{CredentialChange, User, UserChange};
 use crate::prelude::*;
 
-add_hub_trait!(UpdateUser);
+register_service!(UpdateUser);
 
 pub struct UserChanges {
     pub user: UserChange,

@@ -2,8 +2,8 @@ use pbkdf2::{pbkdf2_check, pbkdf2_simple};
 
 use crate::prelude::*;
 
-add_hub_trait!(CanHashPassword);
-add_hub_trait!(CanCheckPassword);
+register_service!(CanHashPassword);
+register_service!(CanCheckPassword);
 
 const HASH_ITERATION_COUNT: u32 = 10000;
 

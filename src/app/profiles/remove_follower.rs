@@ -2,7 +2,7 @@ use super::{find_user, Profile};
 use crate::db;
 use crate::prelude::*;
 
-add_hub_trait!(CanRemoveFollower);
+register_service!(CanRemoveFollower);
 
 pub trait CanRemoveFollower: db::HaveConn {
     fn remove_follower(&self, username: &str, follower_id: i32) -> Result<Profile> {

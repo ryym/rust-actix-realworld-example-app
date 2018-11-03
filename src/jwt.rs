@@ -5,8 +5,8 @@ use serde::de::DeserializeOwned;
 use crate::config::HaveConfig;
 use crate::prelude::*;
 
-add_hub_trait!(GenerateJwt);
-add_hub_trait!(DecodeJwt);
+register_service!(GenerateJwt);
+register_service!(DecodeJwt);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Payload {

@@ -13,7 +13,7 @@ pub struct Params {
     offset: Option<u32>,
 }
 
-add_hub_trait!(FeedArticles);
+register_service!(FeedArticles);
 
 pub trait CanFeedArticles {
     fn feed_articles(&self, user: &User, params: Params) -> Result<Vec<res::Article>>;

@@ -3,7 +3,7 @@ use crate::error::ErrorKindAuth;
 use crate::mdl::User;
 use crate::prelude::*;
 
-add_hub_trait!(DeleteArticle);
+register_service!(DeleteArticle);
 
 pub trait CanDeleteArticle {
     fn delete_article(&self, user: &User, slug: &str) -> Result<()>;

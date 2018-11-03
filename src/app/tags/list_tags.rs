@@ -1,6 +1,6 @@
 use crate::{db, prelude::*};
 
-add_hub_trait!(ListTags);
+register_service!(ListTags);
 
 pub trait CanListTags {
     fn list_tags(&self) -> Result<Vec<String>>;
