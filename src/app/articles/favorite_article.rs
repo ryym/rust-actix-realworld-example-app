@@ -1,11 +1,10 @@
 use super::get_article::CanGetArticle;
 use super::res;
 use crate::db;
-use crate::hub::Hub;
 use crate::mdl::{Article, NewFavoriteArticle, User};
 use crate::prelude::*;
 
-impl FavoriteArticle for Hub {}
+add_hub_trait!(FavoriteArticle);
 
 pub trait CanFavoriteArticle {
     fn favorite_article(&self, user: &User, slug: &str) -> Result<res::Article>;

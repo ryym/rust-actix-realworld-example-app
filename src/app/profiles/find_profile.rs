@@ -2,11 +2,10 @@ use diesel::prelude::*;
 
 use super::{find_user, Profile};
 use crate::db;
-use crate::hub::Hub;
 use crate::mdl::User;
 use crate::prelude::*;
 
-impl CanFindProfile for Hub {}
+add_hub_trait!(CanFindProfile);
 
 pub trait CanFindProfile: db::HaveConn {
     fn find_profile(&self, username: &str, current: Option<&User>) -> Result<Profile> {

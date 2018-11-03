@@ -3,11 +3,10 @@ use diesel::{self, prelude::*};
 use super::password::CanHashPassword;
 use super::SignupUser;
 use crate::db;
-use crate::hub::Hub;
 use crate::mdl::{NewCredential, NewUser, User};
 use crate::prelude::*;
 
-impl RegisterUser for Hub {}
+add_hub_trait!(RegisterUser);
 
 pub trait CanRegisterUser {
     fn register_user(&self, form: &SignupUser) -> Result<User>;

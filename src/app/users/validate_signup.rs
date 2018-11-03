@@ -2,10 +2,9 @@ use diesel::prelude::*;
 
 use super::SignupUser;
 use crate::db;
-use crate::hub::Hub;
 use crate::prelude::*;
 
-impl ValidateSignup for Hub {}
+add_hub_trait!(ValidateSignup);
 
 // username
 //  - length: 1..=20

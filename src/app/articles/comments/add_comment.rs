@@ -1,11 +1,10 @@
 use super::NewComment;
 use crate::app::res;
 use crate::db;
-use crate::hub::Hub;
 use crate::mdl::{self, Comment, User};
 use crate::prelude::*;
 
-impl AddComment for Hub {}
+add_hub_trait!(AddComment);
 
 pub trait CanAddComment {
     fn add_comment(&self, slug: &str, author: User, comment: NewComment) -> Result<res::Comment>;

@@ -3,11 +3,10 @@ use jsonwebtoken::{self as jwt, errors as jwt_errors};
 use serde::de::DeserializeOwned;
 
 use crate::config::HaveConfig;
-use crate::hub::Hub;
 use crate::prelude::*;
 
-impl GenerateJwt for Hub {}
-impl DecodeJwt for Hub {}
+add_hub_trait!(GenerateJwt);
+add_hub_trait!(DecodeJwt);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Payload {

@@ -5,11 +5,10 @@ use super::slugify::CanSlugify;
 use super::ArticleChange;
 use crate::db;
 use crate::error::ErrorKindAuth;
-use crate::hub::Hub;
 use crate::mdl::{self, Article, User};
 use crate::prelude::*;
 
-impl UpdateArticle for Hub {}
+add_hub_trait!(UpdateArticle);
 
 pub trait CanUpdateArticle {
     fn update_article(

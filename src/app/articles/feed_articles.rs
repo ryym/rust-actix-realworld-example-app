@@ -4,7 +4,6 @@ use std::cmp;
 use super::build_article_list::CanBuildArticleList;
 use super::res;
 use crate::db;
-use crate::hub::Hub;
 use crate::mdl::{Article, User};
 use crate::prelude::*;
 
@@ -14,7 +13,7 @@ pub struct Params {
     offset: Option<u32>,
 }
 
-impl FeedArticles for Hub {}
+add_hub_trait!(FeedArticles);
 
 pub trait CanFeedArticles {
     fn feed_articles(&self, user: &User, params: Params) -> Result<Vec<res::Article>>;

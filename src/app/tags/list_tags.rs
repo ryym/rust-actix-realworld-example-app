@@ -1,6 +1,6 @@
-use crate::{db, hub::Hub, prelude::*};
+use crate::{db, prelude::*};
 
-impl ListTags for Hub {}
+add_hub_trait!(ListTags);
 
 pub trait CanListTags {
     fn list_tags(&self) -> Result<Vec<String>>;

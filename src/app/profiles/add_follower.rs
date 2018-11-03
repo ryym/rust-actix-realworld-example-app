@@ -2,11 +2,10 @@ use diesel::{self, prelude::*};
 
 use super::{find_user, Profile};
 use crate::db;
-use crate::hub::Hub;
 use crate::mdl::{NewFollower, User};
 use crate::prelude::*;
 
-impl CanAddFollower for Hub {}
+add_hub_trait!(CanAddFollower);
 
 pub trait CanAddFollower: db::HaveConn {
     fn add_follower(&self, username: &str, follower_id: i32) -> Result<Profile> {

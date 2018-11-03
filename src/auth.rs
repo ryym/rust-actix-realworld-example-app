@@ -9,7 +9,7 @@ use crate::prelude::*;
 
 const TOKEN_PREFIX: &str = "Token ";
 
-impl Authenticate for Hub {}
+add_hub_trait!(Authenticate);
 
 pub trait CanAuthenticate {
     fn authenticate<S>(&self, req: &HttpRequest<S>) -> Result<Auth>;

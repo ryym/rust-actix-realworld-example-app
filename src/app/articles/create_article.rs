@@ -3,11 +3,10 @@ use super::res;
 use super::slugify::CanSlugify;
 use super::NewArticle;
 use crate::db;
-use crate::hub::Hub;
 use crate::mdl;
 use crate::prelude::*;
 
-impl CreateArticle for Hub {}
+add_hub_trait!(CreateArticle);
 
 pub trait CanCreateArticle {
     fn create_article(&self, author: mdl::User, article: NewArticle) -> Result<res::Article>;

@@ -1,10 +1,9 @@
 use super::password::CanHashPassword;
 use crate::db;
-use crate::hub::Hub;
 use crate::mdl::{CredentialChange, User, UserChange};
 use crate::prelude::*;
 
-impl UpdateUser for Hub {}
+add_hub_trait!(UpdateUser);
 
 pub struct UserChanges {
     pub user: UserChange,

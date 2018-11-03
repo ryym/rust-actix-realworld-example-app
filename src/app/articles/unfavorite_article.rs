@@ -1,11 +1,10 @@
 use super::get_article::CanGetArticle;
 use super::res;
 use crate::db;
-use crate::hub::Hub;
 use crate::mdl::{Article, User};
 use crate::prelude::*;
 
-impl UnfavoriteArticle for Hub {}
+add_hub_trait!(UnfavoriteArticle);
 
 pub trait CanUnfavoriteArticle {
     fn unfavorite_article(&self, user: &User, slug: &str) -> Result<res::Article>;

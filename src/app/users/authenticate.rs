@@ -1,10 +1,9 @@
 use super::{password::CanCheckPassword, SigninUser};
 use crate::db;
-use crate::hub::Hub;
 use crate::mdl::{Credential, User};
 use crate::prelude::*;
 
-impl Authenticate for Hub {}
+add_hub_trait!(Authenticate);
 
 pub trait CanAuthenticate {
     fn authenticate(&self, form: &SigninUser) -> Result<User>;

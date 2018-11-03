@@ -1,10 +1,9 @@
 use super::res;
 use crate::db;
-use crate::hub::Hub;
 use crate::mdl::{Article, User};
 use crate::prelude::*;
 
-impl GetArticle for Hub {}
+add_hub_trait!(GetArticle);
 
 pub trait CanGetArticle {
     fn get_article(&self, slug: &str, current: Option<&User>) -> Result<res::Article>;

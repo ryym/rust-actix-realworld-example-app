@@ -27,12 +27,14 @@ extern crate r2d2;
 #[macro_use]
 mod test;
 
+#[macro_use]
+mod hub;
+
 mod app;
 mod auth;
 mod config;
 mod db;
 mod error;
-mod hub;
 mod jwt;
 mod mdl;
 mod schema;

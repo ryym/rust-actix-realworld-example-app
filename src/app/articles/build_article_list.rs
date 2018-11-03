@@ -3,11 +3,10 @@ use std::collections::{HashMap, HashSet};
 
 use super::res;
 use crate::db;
-use crate::hub::Hub;
 use crate::mdl::{Article, User};
 use crate::prelude::*;
 
-impl BuildArticleList for Hub {}
+add_hub_trait!(BuildArticleList);
 
 pub trait CanBuildArticleList {
     fn build_article_list(

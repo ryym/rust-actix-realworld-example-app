@@ -1,9 +1,7 @@
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use std::iter;
 
-use crate::hub::Hub;
-
-impl CanSlugify for Hub {}
+add_hub_trait!(CanSlugify);
 
 pub trait CanSlugify {
     // TODO: Implement better conversion.

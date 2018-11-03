@@ -4,11 +4,10 @@ use std::cmp;
 use super::build_article_list::CanBuildArticleList;
 use super::res;
 use crate::db;
-use crate::hub::Hub;
 use crate::mdl::{Article, User};
 use crate::prelude::*;
 
-impl ListArticles for Hub {}
+add_hub_trait!(ListArticles);
 
 #[derive(Debug, Deserialize)]
 pub struct Params {
