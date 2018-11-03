@@ -28,33 +28,35 @@ pub struct ProfilePath {
 }
 
 pub fn get<S>(
-    (store, path, auth): (State<impl Store<S>>, Path<ProfilePath>, Option<Auth>),
+    (store, path, auth): (State<impl Store<Svc = S>>, Path<ProfilePath>, Option<Auth>),
 ) -> Result<Json<ProfileResponse>>
 where
     S: CanFindProfile,
 {
-    let hub = store.hub()?;
+    let hub = store.service()?;
     let current_user = auth.map(|a| a.user);
     let profile = hub.find_profile(&path.username, current_user.as_ref())?;
     Ok(Json(ProfileResponse { profile }))
 }
 
 pub fn follow<S>(
-    (store, path, auth): (State<impl Store<S>>, Path<ProfilePath>, Auth),
+    (store, path, auth): (State<impl Store<Svc = S>>, Path<ProfilePath>, Auth),
 ) -> Result<Json<ProfileResponse>>
 where
     S: CanAddFollower,
 {
-    let profile = store.hub()?.add_follower(&path.username, auth.user.id)?;
+    let svc = store.service()?;
+    let profile = svc.add_follower(&path.username, auth.user.id)?;
     Ok(Json(ProfileResponse { profile }))
 }
 
 pub fn unfollow<S>(
-    (store, path, auth): (State<impl Store<S>>, Path<ProfilePath>, Auth),
+    (store, path, auth): (State<impl Store<Svc = S>>, Path<ProfilePath>, Auth),
 ) -> Result<Json<ProfileResponse>>
 where
     S: CanRemoveFollower,
 {
-    let profile = store.hub()?.remove_follower(&path.username, auth.user.id)?;
+    let svc = store.service()?;
+    let profile = svc.remove_follower(&path.username, auth.user.id)?;
     Ok(Json(ProfileResponse { profile }))
 }

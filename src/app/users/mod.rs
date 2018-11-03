@@ -47,12 +47,12 @@ pub struct UserChange {
 }
 
 pub fn sign_up<S>(
-    (form, store): (Json<In<SignupUser>>, State<impl Store<S>>),
+    (form, store): (Json<In<SignupUser>>, State<impl Store<Svc = S>>),
 ) -> Result<Json<UserResponse>>
 where
     S: CanValidateSignup + CanRegisterUser + CanGenerateJwt,
 {
-    let hub = store.hub()?;
+    let hub = store.service()?;
 
     let form = form.into_inner().user;
     hub.validate_signup(&form)?;
@@ -65,12 +65,12 @@ where
 }
 
 pub fn sign_in<S>(
-    (form, store): (Json<In<SigninUser>>, State<impl Store<S>>),
+    (form, store): (Json<In<SigninUser>>, State<impl Store<Svc = S>>),
 ) -> Result<Json<UserResponse>>
 where
     S: CanAuthenticate + CanGenerateJwt,
 {
-    let hub = store.hub()?;
+    let hub = store.service()?;
     let form = form.into_inner().user;
     let user = hub.authenticate(&form)?;
     let token = hub.generate_jwt(user.id)?;
@@ -85,7 +85,7 @@ pub fn get_current(auth: Auth) -> Result<Json<UserResponse>> {
 }
 
 pub fn update<S>(
-    (store, form, auth): (State<impl Store<S>>, Json<In<UserChange>>, Auth),
+    (store, form, auth): (State<impl Store<Svc = S>>, Json<In<UserChange>>, Auth),
 ) -> Result<Json<UserResponse>>
 where
     S: CanUpdateUser,
@@ -93,7 +93,7 @@ where
     // TODO: Validate input.
     let form = form.into_inner().user;
 
-    let hub = store.hub()?;
+    let hub = store.service()?;
     let user = hub.update_user(
         auth.user,
         UserChanges {

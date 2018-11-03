@@ -7,11 +7,11 @@ use crate::app::res::TagListResponse;
 use crate::hub::Store;
 use crate::prelude::*;
 
-pub fn list<S>(store: State<impl Store<S>>) -> Result<Json<TagListResponse>>
+pub fn list<S>(store: State<impl Store<Svc = S>>) -> Result<Json<TagListResponse>>
 where
     S: CanListTags,
 {
-    let hub = store.hub()?;
+    let hub = store.service()?;
     let tags = hub.list_tags()?;
     Ok(Json(TagListResponse { tags }))
 }

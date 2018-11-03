@@ -29,8 +29,9 @@ pub fn init() -> Result<Test> {
 
 pub struct Store<S>(pub S);
 
-impl<S: Clone> hub::Store<S> for Store<S> {
-    fn hub(&self) -> Result<S> {
+impl<S: Clone> hub::Store for Store<S> {
+    type Svc = S;
+    fn service(&self) -> Result<S> {
         Ok(self.0.clone())
     }
 }

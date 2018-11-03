@@ -2,8 +2,9 @@ use crate::config::{Config, HaveConfig};
 use crate::db;
 use crate::prelude::*;
 
-pub trait Store<S> {
-    fn hub(&self) -> Result<S>;
+pub trait Store {
+    type Svc;
+    fn service(&self) -> Result<Self::Svc>;
 }
 
 pub struct AppStore {
@@ -17,8 +18,9 @@ impl AppStore {
     }
 }
 
-impl Store<Hub> for AppStore {
-    fn hub(&self) -> Result<Hub> {
+impl Store for AppStore {
+    type Svc = Hub;
+    fn service(&self) -> Result<Self::Svc> {
         let conn = db::get_conn(&self.db_pool)?;
         Ok(Hub {
             config: self.config.clone(),

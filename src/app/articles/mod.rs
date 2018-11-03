@@ -53,30 +53,30 @@ pub struct ArticleChange {
 }
 
 pub fn create<S>(
-    (store, auth, form): (State<impl Store<S>>, Auth, Json<In<NewArticle>>),
+    (store, auth, form): (State<impl Store<Svc = S>>, Auth, Json<In<NewArticle>>),
 ) -> Result<Json<ArticleResponse>>
 where
     S: CanCreateArticle,
 {
     let new_article = form.into_inner().article;
-    let article = store.hub()?.create_article(auth.user, new_article)?;
+    let article = store.service()?.create_article(auth.user, new_article)?;
     Ok(Json(ArticleResponse { article }))
 }
 
 pub fn get<S>(
-    (store, auth, slug): (State<impl Store<S>>, Option<Auth>, Path<String>),
+    (store, auth, slug): (State<impl Store<Svc = S>>, Option<Auth>, Path<String>),
 ) -> Result<Json<ArticleResponse>>
 where
     S: CanGetArticle,
 {
     let user = auth.map(|a| a.user);
-    let article = store.hub()?.get_article(&slug, user.as_ref())?;
+    let article = store.service()?.get_article(&slug, user.as_ref())?;
     Ok(Json(ArticleResponse { article }))
 }
 
 pub fn update<S>(
     (store, auth, slug, form): (
-        State<impl Store<S>>,
+        State<impl Store<Svc = S>>,
         Auth,
         Path<String>,
         Json<In<ArticleChange>>,
@@ -86,61 +86,61 @@ where
     S: CanUpdateArticle,
 {
     let change = form.into_inner().article;
-    let article = store.hub()?.update_article(&auth.user, &slug, change)?;
+    let article = store.service()?.update_article(&auth.user, &slug, change)?;
     Ok(Json(ArticleResponse { article }))
 }
 
 pub fn delete<S>(
-    (store, auth, slug): (State<impl Store<S>>, Auth, Path<String>),
+    (store, auth, slug): (State<impl Store<Svc = S>>, Auth, Path<String>),
 ) -> Result<Json<()>>
 where
     S: CanDeleteArticle,
 {
-    store.hub()?.delete_article(&auth.user, &slug)?;
+    store.service()?.delete_article(&auth.user, &slug)?;
     Ok(Json(()))
 }
 
 pub fn favorite<S>(
-    (store, auth, slug): (State<impl Store<S>>, Auth, Path<String>),
+    (store, auth, slug): (State<impl Store<Svc = S>>, Auth, Path<String>),
 ) -> Result<Json<ArticleResponse>>
 where
     S: CanFavoriteArticle,
 {
-    let article = store.hub()?.favorite_article(&auth.user, &slug)?;
+    let article = store.service()?.favorite_article(&auth.user, &slug)?;
     Ok(Json(ArticleResponse { article }))
 }
 
 pub fn unfavorite<S>(
-    (store, auth, slug): (State<impl Store<S>>, Auth, Path<String>),
+    (store, auth, slug): (State<impl Store<Svc = S>>, Auth, Path<String>),
 ) -> Result<Json<ArticleResponse>>
 where
     S: CanUnfavoriteArticle,
 {
-    let article = store.hub()?.unfavorite_article(&auth.user, &slug)?;
+    let article = store.service()?.unfavorite_article(&auth.user, &slug)?;
     Ok(Json(ArticleResponse { article }))
 }
 
 pub fn list<S>(
-    (store, auth, params): (State<impl Store<S>>, Option<Auth>, Query<Params>),
+    (store, auth, params): (State<impl Store<Svc = S>>, Option<Auth>, Query<Params>),
 ) -> Result<Json<ArticleListResponse>>
 where
     S: CanListArticles,
 {
     let user = auth.map(|a| a.user);
     let articles = store
-        .hub()?
+        .service()?
         .list_articles(params.into_inner(), user.as_ref())?;
     Ok(Json(ArticleListResponse::new(articles)))
 }
 
 pub fn feed<S>(
-    (store, auth, params): (State<impl Store<S>>, Auth, Query<FeedParams>),
+    (store, auth, params): (State<impl Store<Svc = S>>, Auth, Query<FeedParams>),
 ) -> Result<Json<ArticleListResponse>>
 where
     S: CanFeedArticles,
 {
     let articles = store
-        .hub()?
+        .service()?
         .feed_articles(&auth.user, params.into_inner())?;
     Ok(Json(ArticleListResponse::new(articles)))
 }
