@@ -23,16 +23,6 @@ impl HaveConfig for Hub {
     }
 }
 
-impl db::HaveDb for Hub {
-    fn use_db<F, T>(&self, f: F) -> Result<T>
-    where
-        F: FnOnce(&db::Conn) -> Result<T>,
-    {
-        let conn = db::get_conn(&self.db_pool)?;
-        f(&conn)
-    }
-}
-
 // XXX: Temporary.
 impl Store<Hub> for Hub {
     fn hub(&self) -> Result<Hub> {

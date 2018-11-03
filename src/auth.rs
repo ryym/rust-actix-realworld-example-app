@@ -1,6 +1,6 @@
 use actix_web::{http::header::AUTHORIZATION, FromRequest, HttpRequest};
 
-use crate::db::HaveDb;
+use crate::db;
 use crate::error::ErrorKindAuth;
 use crate::hub::Hub;
 use crate::jwt::{CanDecodeJwt, Decoded, Payload};
@@ -15,7 +15,7 @@ pub trait CanAuthenticate {
     fn authenticate<S>(&self, req: &HttpRequest<S>) -> Result<Auth>;
 }
 
-pub trait Authenticate: CanDecodeJwt + HaveDb {}
+pub trait Authenticate: db::HaveConn + CanDecodeJwt {}
 impl<T: Authenticate> CanAuthenticate for T {
     fn authenticate<S>(&self, req: &HttpRequest<S>) -> Result<Auth> {
         let token = match req.headers().get(AUTHORIZATION) {
@@ -36,19 +36,20 @@ impl<T: Authenticate> CanAuthenticate for T {
             Decoded::Invalid(err) => return Err(err.context(ErrorKindAuth::InvalidToken).into()),
         };
 
-        let user = self.use_db(|conn| {
-            use crate::schema::users::dsl::*;
-            use diesel::prelude::*;
-
-            let user = users
-                .find(payload.id)
-                .first(conn)
-                .context(ErrorKindAuth::InvalidUser)?;
-            Ok(user)
-        })?;
-
+        let user = find_user(self.conn(), payload.id)?;
         Ok(Auth { user, token })
     }
+}
+
+fn find_user(conn: &db::Conn, id: i32) -> Result<User> {
+    use crate::schema::users;
+    use diesel::prelude::*;
+
+    let user = users::table
+        .find(id)
+        .first(conn)
+        .context(ErrorKindAuth::InvalidUser)?;
+    Ok(user)
 }
 
 /// Extract a payload from JWT in the Authorization header and load a user.

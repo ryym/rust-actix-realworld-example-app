@@ -22,12 +22,6 @@ pub fn get_conn(pool: &Pool) -> Result<PooledConnection<ConnectionManager<Conn>>
     Ok(conn)
 }
 
-pub trait HaveDb {
-    fn use_db<F, T>(&self, f: F) -> Result<T>
-    where
-        F: FnOnce(&Conn) -> Result<T>;
-}
-
 pub trait HaveConn {
     fn conn(&self) -> &Conn;
 }
