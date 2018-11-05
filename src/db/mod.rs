@@ -1,3 +1,4 @@
+pub mod articles;
 pub mod followers;
 pub mod users;
 

@@ -24,7 +24,7 @@ impl<T: CreateArticle> CanCreateArticle for T {
         };
         let tag_list = article.tag_list;
 
-        let article = insert_article(self.conn(), new_article)?;
+        let article = db::articles::insert(self.conn(), &new_article)?;
         let tags = self.replace_tags(article.id, tag_list)?;
 
         Ok(res::Article {
@@ -40,14 +40,4 @@ impl<T: CreateArticle> CanCreateArticle for T {
             author: res::Profile::from_user(author, false),
         })
     }
-}
-
-fn insert_article(conn: &db::Conn, article: mdl::NewArticle) -> Result<mdl::Article> {
-    use crate::schema::articles;
-    use diesel::{self, prelude::*};
-
-    let article = diesel::insert_into(articles::table)
-        .values(&article)
-        .get_result(conn)?;
-    Ok(article)
 }

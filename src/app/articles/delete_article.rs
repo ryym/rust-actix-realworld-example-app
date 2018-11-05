@@ -13,7 +13,7 @@ pub trait DeleteArticle: db::HaveConn {}
 impl<T: DeleteArticle> CanDeleteArticle for T {
     fn delete_article(&self, user: &User, slug: &str) -> Result<()> {
         use crate::schema::articles;
-        use diesel::{self, prelude::*};
+        use diesel::prelude::*;
 
         let (id, author_id) = articles::table
             .filter(articles::slug.eq(slug))
@@ -24,7 +24,7 @@ impl<T: DeleteArticle> CanDeleteArticle for T {
             return Err(ErrorKindAuth::Forbidden.into());
         }
 
-        diesel::delete(articles::table.filter(articles::id.eq(id))).execute(self.conn())?;
+        db::articles::delete(self.conn(), id)?;
 
         Ok(())
     }
