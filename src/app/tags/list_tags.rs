@@ -21,9 +21,8 @@ impl<T: ListTags> CanListTags for T {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::schema::{article_tags, articles, users};
+    use crate::password::HashedPassword;
     use crate::{db, mdl, test};
-    use diesel::prelude::*;
 
     #[test]
     fn list_all_tags() -> Result<()> {
@@ -31,38 +30,30 @@ mod test {
 
         let conn = t.db_conn()?;
 
-        let author_id = diesel::insert_into(users::table)
-            .values(&mdl::NewUser {
+        let author = db::users::insert(
+            &conn,
+            &mdl::NewUser {
                 username: String::new(),
                 email: String::new(),
                 bio: None,
                 image: None,
-            }).returning(users::id)
-            .get_result::<i32>(&conn)?;
+            },
+            HashedPassword::new("test"),
+        )?;
 
-        let article_id = diesel::insert_into(articles::table)
-            .values(mdl::NewArticle {
-                author_id,
+        let article = db::articles::insert(
+            &conn,
+            &mdl::NewArticle {
+                author_id: author.id,
                 slug: String::new(),
                 title: String::new(),
                 description: String::new(),
                 body: String::new(),
-            }).returning(articles::id)
-            .get_result::<i32>(&conn)?;
+            },
+        )?;
 
-        let tags = vec![
-            mdl::NewArticleTag {
-                article_id,
-                tag_name: "tag_a".to_owned(),
-            },
-            mdl::NewArticleTag {
-                article_id,
-                tag_name: "tag_b".to_owned(),
-            },
-        ];
-        diesel::insert_into(article_tags::table)
-            .values(&tags)
-            .execute(&conn)?;
+        let tags = vec!["tag_a".to_owned(), "tag_b".to_owned()];
+        db::articles::add_tags(&conn, article.id, tags.into_iter())?;
 
         struct Mock {
             conn: db::Conn,

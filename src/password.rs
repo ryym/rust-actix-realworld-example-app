@@ -9,6 +9,13 @@ const HASH_ITERATION_COUNT: u32 = 10000;
 
 pub struct HashedPassword(String);
 
+impl HashedPassword {
+    #[cfg(test)]
+    pub fn new<S: Into<String>>(password: S) -> Self {
+        HashedPassword(password.into())
+    }
+}
+
 impl Into<String> for HashedPassword {
     fn into(self) -> String {
         self.0
