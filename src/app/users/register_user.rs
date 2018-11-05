@@ -1,9 +1,7 @@
-use diesel::{self, prelude::*};
-
 use super::password::CanHashPassword;
 use super::SignupUser;
 use crate::db;
-use crate::mdl::{NewCredential, NewUser, User};
+use crate::mdl::{NewUser, User};
 use crate::prelude::*;
 
 register_service!(RegisterUser);
@@ -15,42 +13,17 @@ pub trait CanRegisterUser {
 pub trait RegisterUser: db::HaveConn + CanHashPassword {}
 impl<T: RegisterUser> CanRegisterUser for T {
     fn register_user(&self, form: &SignupUser) -> Result<User> {
-        let conn = self.conn();
-        conn.transaction(|| {
-            let user = insert_user(conn, &form)?;
-            let password_hash = self.hash_password(&form.password)?;
-            insert_credential(conn, user.id, password_hash)?;
-            Ok(user)
-        })
+        let new_user = NewUser {
+            username: form.username.clone(),
+            email: form.email.clone(),
+            bio: None,
+            image: None,
+        };
+        let password_hash = self.hash_password(&form.password)?;
+        db::users::insert(
+            self.conn(),
+            &new_user,
+            db::users::HashedPassword(password_hash),
+        )
     }
-}
-
-fn insert_user(conn: &db::Conn, form: &SignupUser) -> Result<User> {
-    use crate::schema::users::dsl::*;
-
-    let new_user = NewUser {
-        username: form.username.clone(),
-        email: form.email.clone(),
-        bio: None,
-        image: None,
-    };
-    let user = diesel::insert_into(users)
-        .values(&new_user)
-        .get_result::<User>(conn)
-        .context("register user")?;
-    Ok(user)
-}
-
-fn insert_credential(conn: &db::Conn, user_id: i32, password_hash: String) -> Result<()> {
-    use crate::schema::credentials;
-
-    let new_cred = NewCredential {
-        user_id,
-        password_hash,
-    };
-    diesel::insert_into(credentials::table)
-        .values(&new_cred)
-        .execute(conn)
-        .context("register credential")?;
-    Ok(())
 }

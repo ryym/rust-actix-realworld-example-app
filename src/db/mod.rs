@@ -1,3 +1,5 @@
+pub mod users;
+
 use diesel::{
     self,
     r2d2::{self, ConnectionManager, PooledConnection},
@@ -38,4 +40,11 @@ pub fn may_update<T>(result: Result<T, DieselError>) -> Result<Option<T>, Diesel
             err => Err(err),
         },
     }
+}
+
+/// Return `Some(new)` if `new` is not equal to `old`, otherwise `None`.
+/// This is useful to set up diesel's `AsChangeset` struct to update
+/// only the changed columns.
+pub fn if_changed<T: PartialEq>(new: Option<T>, old: &T) -> Option<T> {
+    new.and_then(|new| if new != *old { Some(new) } else { None })
 }

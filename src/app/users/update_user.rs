@@ -1,6 +1,6 @@
 use super::password::CanHashPassword;
-use crate::db;
-use crate::mdl::{CredentialChange, User, UserChange};
+use crate::db::{self, if_changed};
+use crate::mdl::{User, UserChange};
 use crate::prelude::*;
 
 register_service!(UpdateUser);
@@ -17,12 +17,6 @@ pub trait CanUpdateUser {
 pub trait UpdateUser: db::HaveConn + CanHashPassword {}
 impl<T: UpdateUser> CanUpdateUser for T {
     fn update_user(&self, current: User, change: UserChanges) -> Result<User> {
-        use crate::schema::{
-            credentials::dsl::*,
-            users::{self, dsl::*},
-        };
-        use diesel::prelude::*;
-
         let given = change.user;
         let user_change = UserChange {
             username: if_changed(given.username, &current.username),
@@ -31,32 +25,12 @@ impl<T: UpdateUser> CanUpdateUser for T {
             image: if_changed(given.image, &current.image),
         };
 
-        let cred_change = CredentialChange {
-            password_hash: match change.new_password {
-                Some(ref pass) => Some(self.hash_password(pass)?),
-                None => None,
-            },
+        let password_hash = match change.new_password {
+            Some(ref pass) => Some(db::users::HashedPassword(self.hash_password(pass)?)),
+            None => None,
         };
+        let user = db::users::update(self.conn(), current.id, &user_change, password_hash)?;
 
-        let conn = self.conn();
-        conn.transaction(|| {
-            db::may_update(
-                diesel::update(credentials.filter(user_id.eq(current.id)))
-                    .set(cred_change)
-                    .execute(conn),
-            )?;
-
-            let user = db::may_update(
-                diesel::update(users.filter(users::id.eq(current.id)))
-                    .set(user_change)
-                    .get_result(conn),
-            )?.unwrap_or(current);
-
-            Ok(user)
-        })
+        Ok(user.unwrap_or(current))
     }
-}
-
-fn if_changed<T: PartialEq>(new: Option<T>, old: &T) -> Option<T> {
-    new.and_then(|new| if new != *old { Some(new) } else { None })
 }
