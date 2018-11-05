@@ -7,10 +7,18 @@ register_service!(CanCheckPassword);
 
 const HASH_ITERATION_COUNT: u32 = 10000;
 
+pub struct HashedPassword(String);
+
+impl Into<String> for HashedPassword {
+    fn into(self) -> String {
+        self.0
+    }
+}
+
 pub trait CanHashPassword {
-    fn hash_password(&self, password: &str) -> Result<String> {
+    fn hash_password(&self, password: &str) -> Result<HashedPassword> {
         let hash = pbkdf2_simple(password, HASH_ITERATION_COUNT).context("hash password")?;
-        Ok(hash)
+        Ok(HashedPassword(hash))
     }
 }
 

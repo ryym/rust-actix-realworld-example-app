@@ -37,6 +37,7 @@ mod db;
 mod error;
 mod jwt;
 mod mdl;
+mod password;
 mod schema;
 
 pub mod prelude {

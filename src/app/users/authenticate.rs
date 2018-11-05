@@ -1,6 +1,7 @@
-use super::{password::CanCheckPassword, SigninUser};
+use super::SigninUser;
 use crate::db;
 use crate::mdl::{Credential, User};
+use crate::password::CanCheckPassword;
 use crate::prelude::*;
 
 register_service!(Authenticate);

@@ -1,11 +1,9 @@
 use crate::db::{may_update, Conn};
 use crate::mdl::{CredentialChange, NewCredential, NewUser, User, UserChange};
+use crate::password::HashedPassword;
 use crate::prelude::*;
 use crate::schema::{credentials, users};
 use diesel::prelude::*;
-
-/// Be careful not to save a raw password.
-pub struct HashedPassword(pub String);
 
 pub fn insert(conn: &Conn, user: &NewUser, password: HashedPassword) -> Result<User> {
     conn.transaction(|| {
@@ -16,7 +14,7 @@ pub fn insert(conn: &Conn, user: &NewUser, password: HashedPassword) -> Result<U
 
         let cred = NewCredential {
             user_id: user.id,
-            password_hash: password.0,
+            password_hash: password.into(),
         };
         diesel::insert_into(credentials::table)
             .values(cred)
@@ -33,7 +31,7 @@ pub fn update(
     new_password: Option<HashedPassword>,
 ) -> Result<Option<User>> {
     let cred = CredentialChange {
-        password_hash: new_password.map(|p| p.0),
+        password_hash: new_password.map(|p| p.into()),
     };
     conn.transaction(|| {
         may_update(

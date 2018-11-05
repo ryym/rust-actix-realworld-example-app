@@ -1,7 +1,7 @@
-use super::password::CanHashPassword;
 use super::SignupUser;
 use crate::db;
 use crate::mdl::{NewUser, User};
+use crate::password::CanHashPassword;
 use crate::prelude::*;
 
 register_service!(RegisterUser);
@@ -20,10 +20,6 @@ impl<T: RegisterUser> CanRegisterUser for T {
             image: None,
         };
         let password_hash = self.hash_password(&form.password)?;
-        db::users::insert(
-            self.conn(),
-            &new_user,
-            db::users::HashedPassword(password_hash),
-        )
+        db::users::insert(self.conn(), &new_user, password_hash)
     }
 }

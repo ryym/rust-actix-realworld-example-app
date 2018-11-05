@@ -1,5 +1,4 @@
 mod authenticate;
-mod password;
 mod register_user;
 mod update_user;
 mod validate_signup;

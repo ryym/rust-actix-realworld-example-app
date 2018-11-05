@@ -1,6 +1,6 @@
-use super::password::CanHashPassword;
 use crate::db::{self, if_changed};
 use crate::mdl::{User, UserChange};
+use crate::password::CanHashPassword;
 use crate::prelude::*;
 
 register_service!(UpdateUser);
@@ -26,7 +26,7 @@ impl<T: UpdateUser> CanUpdateUser for T {
         };
 
         let password_hash = match change.new_password {
-            Some(ref pass) => Some(db::users::HashedPassword(self.hash_password(pass)?)),
+            Some(ref pass) => Some(self.hash_password(pass)?),
             None => None,
         };
         let user = db::users::update(self.conn(), current.id, &user_change, password_hash)?;
