@@ -1,3 +1,6 @@
+// Policy of these sub modules:
+// - Define only common and simple operations such as insertion, deletion, etc.
+// - Uncommon SELECT queries should be written in their services.
 pub mod articles;
 pub mod followers;
 pub mod users;
