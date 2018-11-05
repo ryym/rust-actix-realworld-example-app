@@ -50,3 +50,10 @@ pub fn update(
         Ok(user)
     })
 }
+
+pub fn find_by_name(conn: &Conn, username: &str) -> Result<User> {
+    let user = users::table
+        .filter(users::username.eq(username))
+        .first(conn)?;
+    Ok(user)
+}

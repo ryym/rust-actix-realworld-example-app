@@ -9,18 +9,8 @@ use self::find_profile::CanFindProfile;
 use self::remove_follower::CanRemoveFollower;
 use super::res::{Profile, ProfileResponse};
 use crate::auth::Auth;
-use crate::db;
 use crate::hub::Store;
-use crate::mdl::User;
 use crate::prelude::*;
-
-fn find_user(conn: &db::Conn, username: &str) -> Result<User> {
-    use crate::schema::users as u;
-    use diesel::prelude::*;
-
-    let user = u::table.filter(u::username.eq(username)).first(conn)?;
-    Ok(user)
-}
 
 #[derive(Debug, Deserialize)]
 pub struct ProfilePath {

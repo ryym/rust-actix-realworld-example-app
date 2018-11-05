@@ -1,6 +1,6 @@
 use diesel::prelude::*;
 
-use super::{find_user, Profile};
+use super::Profile;
 use crate::db;
 use crate::mdl::User;
 use crate::prelude::*;
@@ -9,7 +9,7 @@ register_service!(CanFindProfile);
 
 pub trait CanFindProfile: db::HaveConn {
     fn find_profile(&self, username: &str, current: Option<&User>) -> Result<Profile> {
-        let user = find_user(self.conn(), username)?;
+        let user = db::users::find_by_name(self.conn(), username)?;
         let following = match current {
             None => false,
             Some(current) => is_follower(self.conn(), user.id, current.id)?,

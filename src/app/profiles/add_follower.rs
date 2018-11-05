@@ -1,6 +1,6 @@
 use diesel::{self, prelude::*};
 
-use super::{find_user, Profile};
+use super::Profile;
 use crate::db;
 use crate::mdl::{NewFollower, User};
 use crate::prelude::*;
@@ -9,7 +9,7 @@ register_service!(CanAddFollower);
 
 pub trait CanAddFollower: db::HaveConn {
     fn add_follower(&self, username: &str, follower_id: i32) -> Result<Profile> {
-        let user = find_user(self.conn(), username)?;
+        let user = db::users::find_by_name(self.conn(), username)?;
 
         if user.id == follower_id {
             let msg = "You cannot follow yourself".to_owned();
