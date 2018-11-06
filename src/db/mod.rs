@@ -3,6 +3,7 @@
 // - Uncommon SELECT queries should be written in their services.
 pub mod articles;
 pub mod followers;
+pub mod comments;
 pub mod users;
 
 use diesel::{

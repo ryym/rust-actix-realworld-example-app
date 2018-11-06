@@ -23,7 +23,7 @@ impl<T: DeleteComment> CanDeleteComment for T {
             .select(comments::id)
             .get_result::<i32>(self.conn())?;
 
-        diesel::delete(comments::table.filter(comments::id.eq(comment_id))).execute(self.conn())?;
+        db::comments::delete(self.conn(), comment_id)?;
 
         Ok(())
     }
