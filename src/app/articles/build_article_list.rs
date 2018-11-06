@@ -27,12 +27,12 @@ impl<T: BuildArticleList> CanBuildArticleList for T {
         let (article_ids, author_ids): (Vec<_>, Vec<_>) =
             articles.iter().map(|(a, u)| (a.id, u.id)).unzip();
 
-        let (favorites, followings, fav_counts) = match user {
+        let (followings, favorites, fav_counts) = match user {
             Some(user) => {
                 let conn = self.conn();
                 (
+                    db::followers::filter_followee_ids(conn, user.id, &author_ids)?.collect(),
                     select_favorites(conn, user.id, &article_ids)?,
-                    select_followings(conn, user.id, &author_ids)?,
                     select_favorite_counts(conn, &article_ids)?,
                 )
             }
@@ -72,18 +72,6 @@ fn select_favorites(conn: &db::Conn, user_id: i32, article_ids: &[i32]) -> Resul
         .filter(favs::user_id.eq(user_id))
         .filter(favs::article_id.eq_any(article_ids))
         .select(favs::article_id)
-        .load::<i32>(conn)?;
-
-    Ok(ids.into_iter().collect())
-}
-
-fn select_followings(conn: &db::Conn, user_id: i32, author_ids: &[i32]) -> Result<HashSet<i32>> {
-    use crate::schema::followers as flws;
-
-    let ids = flws::table
-        .filter(flws::user_id.eq_any(author_ids))
-        .filter(flws::follower_id.eq(user_id))
-        .select(flws::user_id)
         .load::<i32>(conn)?;
 
     Ok(ids.into_iter().collect())

@@ -31,7 +31,7 @@ impl<T: ListComments> CanListComments for T {
         let followings = match user {
             Some(user) => {
                 let author_ids = comments.iter().map(|(_, u)| u.id).collect::<Vec<_>>();
-                select_followings(conn, user.id, &author_ids)?
+                db::followers::filter_followee_ids(conn, user.id, &author_ids)?.collect()
             }
             None => HashSet::with_capacity(0),
         };
@@ -46,17 +46,4 @@ impl<T: ListComments> CanListComments for T {
 
         Ok(comments)
     }
-}
-
-// TODO: DRY (copied from app::articles::build_article_list).
-fn select_followings(conn: &db::Conn, user_id: i32, author_ids: &[i32]) -> Result<HashSet<i32>> {
-    use crate::schema::followers as flws;
-
-    let ids = flws::table
-        .filter(flws::user_id.eq_any(author_ids))
-        .filter(flws::follower_id.eq(user_id))
-        .select(flws::user_id)
-        .load::<i32>(conn)?;
-
-    Ok(ids.into_iter().collect())
 }
