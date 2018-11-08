@@ -30,25 +30,13 @@ mod test {
 
         let conn = t.db_conn()?;
 
-        let author = db::users::insert(
-            &conn,
-            &mdl::NewUser {
-                username: String::new(),
-                email: String::new(),
-                bio: None,
-                image: None,
-            },
-            HashedPassword::new("test"),
-        )?;
+        let author = db::users::insert(&conn, &mdl::NewUser::default(), HashedPassword::dummy())?;
 
         let article = db::articles::insert(
             &conn,
             &mdl::NewArticle {
                 author_id: author.id,
-                slug: String::new(),
-                title: String::new(),
-                description: String::new(),
-                body: String::new(),
+                ..Default::default()
             },
         )?;
 

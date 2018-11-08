@@ -24,6 +24,19 @@ pub struct NewArticle {
     pub body: String,
 }
 
+#[cfg(test)]
+impl Default for NewArticle {
+    fn default() -> Self {
+        NewArticle {
+            author_id: 0,
+            slug: String::new(),
+            title: String::new(),
+            description: String::new(),
+            body: String::new(),
+        }
+    }
+}
+
 // XXX: One can create an ArticleChange with title but without slug.
 // It should be avoided.
 #[derive(Debug, AsChangeset)]

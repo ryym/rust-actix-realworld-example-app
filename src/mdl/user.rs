@@ -22,6 +22,18 @@ pub struct NewUser {
     pub image: Option<String>,
 }
 
+#[cfg(test)]
+impl Default for NewUser {
+    fn default() -> Self {
+        NewUser {
+            username: String::new(),
+            email: String::new(),
+            bio: None,
+            image: None,
+        }
+    }
+}
+
 #[derive(Debug, AsChangeset)]
 #[table_name = "users"]
 pub struct UserChange {

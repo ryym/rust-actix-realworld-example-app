@@ -11,8 +11,8 @@ pub struct HashedPassword(String);
 
 impl HashedPassword {
     #[cfg(test)]
-    pub fn new<S: Into<String>>(password: S) -> Self {
-        HashedPassword(password.into())
+    pub fn dummy() -> Self {
+        HashedPassword("dummy".to_owned())
     }
 }
 
