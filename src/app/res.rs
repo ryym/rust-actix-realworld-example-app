@@ -29,7 +29,7 @@ pub struct UserResponse {
     pub user: User,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, PartialEq, Serialize)]
 pub struct Profile {
     username: String,
     bio: Option<String>,
@@ -54,7 +54,7 @@ pub struct ProfileResponse {
 }
 
 // TODO: Should use builder pattern.
-#[derive(Debug, Serialize)]
+#[derive(Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Article {
     pub slug: String,
@@ -128,7 +128,7 @@ pub struct TagListResponse {
 }
 
 /// Default serialization of datetime string.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct DateTimeStr(pub NaiveDateTime);
 
 impl Serialize for DateTimeStr {

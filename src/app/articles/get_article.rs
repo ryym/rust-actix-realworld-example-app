@@ -88,3 +88,51 @@ fn select_tags(conn: &db::Conn, article_id: i32) -> Result<Vec<String>> {
 
     Ok(tags)
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::password::HashedPassword;
+    use crate::{app::res, db, mdl, test};
+
+    struct Mock {
+        conn: db::Conn,
+    }
+    impl_have_conn!(Mock(conn));
+    impl GetArticle for Mock {}
+
+    #[test]
+    fn no_login_required() -> Result<()> {
+        let t = test::init()?;
+        let conn = t.db_conn()?;
+
+        let slug = "rust-is-fun".to_owned();
+        let author = db::users::insert(&conn, &mdl::NewUser::default(), HashedPassword::dummy())?;
+        let article = db::articles::insert(
+            &conn,
+            &mdl::NewArticle {
+                author_id: author.id,
+                slug: slug.clone(),
+                ..Default::default()
+            },
+        )?;
+
+        let res = Mock { conn }.get_article(&slug, None)?;
+
+        let expected = res::Article {
+            slug,
+            title: article.title,
+            description: article.description,
+            body: article.body,
+            tag_list: Vec::with_capacity(0),
+            created_at: res::DateTimeStr(article.created_at),
+            updated_at: res::DateTimeStr(article.updated_at),
+            favorited: false,
+            favorites_count: 0,
+            author: res::Profile::from_user(author, false),
+        };
+        assert_eq!(res, expected);
+
+        Ok(())
+    }
+}
