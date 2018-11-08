@@ -142,7 +142,7 @@ mod test {
 
         let expected = res::Article::new_builder()
             .author(res::Profile::from_user(author, true))
-            .article(article, 1, Vec::with_capacity(0))
+            .article(article, 1, vec![])
             .favorited(true)
             .build();
         assert_eq!(res, expected);

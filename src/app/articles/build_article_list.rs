@@ -27,15 +27,13 @@ impl<T: BuildArticleList> CanBuildArticleList for T {
         let (article_ids, author_ids): (Vec<_>, Vec<_>) =
             articles.iter().map(|(a, u)| (a.id, u.id)).unzip();
 
+        let conn = self.conn();
         let (followings, favorites, fav_counts) = match user {
-            Some(user) => {
-                let conn = self.conn();
-                (
-                    db::followers::filter_followee_ids(conn, user.id, &author_ids)?.collect(),
-                    select_favorites(conn, user.id, &article_ids)?,
-                    select_favorite_counts(conn, &article_ids)?,
-                )
-            }
+            Some(user) => (
+                db::followers::filter_followee_ids(conn, user.id, &author_ids)?.collect(),
+                select_favorites(conn, user.id, &article_ids)?,
+                select_favorite_counts(conn, &article_ids)?,
+            ),
             None => (
                 HashSet::with_capacity(0),
                 HashSet::with_capacity(0),
@@ -43,15 +41,18 @@ impl<T: BuildArticleList> CanBuildArticleList for T {
             ),
         };
 
+        let mut tag_lists = select_tags(conn, &article_ids)?;
+
         let results = articles
             .into_iter()
             .map(|(article, author)| {
                 let following = followings.contains(&author.id);
                 let favorites_count = *fav_counts.get(&article.id).unwrap_or(&0);
+                let tags = tag_lists.remove(&article.id).unwrap_or(vec![]);
                 res::Article::new_builder()
                     .author(res::Profile::from_user(author, following))
                     .favorited(favorites.contains(&article.id))
-                    .article(article, favorites_count, Vec::new()) // TODO: Set tags
+                    .article(article, favorites_count, tags)
                     .build()
             }).collect();
 
@@ -78,10 +79,26 @@ fn select_favorite_counts(conn: &db::Conn, article_ids: &[i32]) -> Result<HashMa
     // Unfortunately, currently diesel does not support `GROUP BY`.
     // https://github.com/diesel-rs/diesel/issues/210
     let fav_counts = favs::table
-        .select((favs::article_id, sql::<BigInt>("count(*)")))
+        .select((favs::article_id, sql::<BigInt>("COUNT(*)")))
         .filter(favs::article_id.eq_any(article_ids))
         .filter(sql("TRUE GROUP BY article_id"))
         .load::<(i32, i64)>(conn)?;
 
     Ok(fav_counts.into_iter().collect())
+}
+
+fn select_tags(conn: &db::Conn, article_ids: &[i32]) -> Result<HashMap<i32, Vec<String>>> {
+    use crate::schema::article_tags;
+
+    let rows = article_tags::table
+        .select((article_tags::article_id, article_tags::tag_name))
+        .filter(article_tags::article_id.eq_any(article_ids))
+        .load::<(i32, String)>(conn)?;
+
+    let id_to_tags = rows.into_iter().fold(HashMap::new(), |mut map, row| {
+        map.entry(row.0).or_insert(Vec::new()).push(row.1);
+        map
+    });
+
+    Ok(id_to_tags)
 }
