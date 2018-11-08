@@ -47,18 +47,12 @@ impl<T: BuildArticleList> CanBuildArticleList for T {
             .into_iter()
             .map(|(article, author)| {
                 let following = followings.contains(&author.id);
-                res::Article {
-                    slug: article.slug,
-                    title: article.title,
-                    description: article.description,
-                    body: article.body,
-                    tag_list: Vec::new(),
-                    created_at: res::DateTimeStr(article.created_at),
-                    updated_at: res::DateTimeStr(article.updated_at),
-                    favorited: favorites.contains(&article.id),
-                    favorites_count: *fav_counts.get(&article.id).unwrap_or(&0),
-                    author: res::Profile::from_user(author, following),
-                }
+                let favorites_count = *fav_counts.get(&article.id).unwrap_or(&0);
+                res::Article::new_builder()
+                    .author(res::Profile::from_user(author, following))
+                    .favorited(favorites.contains(&article.id))
+                    .article(article, favorites_count, Vec::new()) // TODO: Set tags
+                    .build()
             }).collect();
 
         Ok(results)

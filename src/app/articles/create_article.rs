@@ -27,17 +27,11 @@ impl<T: CreateArticle> CanCreateArticle for T {
         let article = db::articles::insert(self.conn(), &new_article)?;
         let tags = self.replace_tags(article.id, tag_list)?;
 
-        Ok(res::Article {
-            slug: article.slug,
-            title: article.title,
-            description: article.description,
-            body: article.body,
-            tag_list: tags,
-            created_at: res::DateTimeStr(article.created_at),
-            updated_at: res::DateTimeStr(article.updated_at),
-            favorited: false,
-            favorites_count: 0,
-            author: res::Profile::from_user(author, false),
-        })
+        let res = res::Article::new_builder()
+            .author(res::Profile::from_user(author, false))
+            .article(article, 0, tags)
+            .build();
+
+        Ok(res)
     }
 }

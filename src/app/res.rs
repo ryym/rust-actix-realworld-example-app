@@ -53,7 +53,6 @@ pub struct ProfileResponse {
     pub profile: Profile,
 }
 
-// TODO: Should use builder pattern.
 #[derive(Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Article {
@@ -67,6 +66,81 @@ pub struct Article {
     pub favorited: bool,
     pub favorites_count: i64,
     pub author: Profile,
+}
+
+impl Article {
+    pub fn new_builder() -> ArticleBuilder<(), (), ()> {
+        ArticleBuilder::new()
+    }
+}
+
+// https://keens.github.io/blog/2017/02/09/rustnochottoyarisuginabuilderpata_n/
+pub struct ArticleBuilder<ArticleT, AuthorT, TagsT> {
+    article: ArticleT,
+    author: AuthorT,
+    favorited: bool,
+    favorites_count: Option<i64>,
+    tag_list: TagsT,
+}
+
+impl ArticleBuilder<(), (), ()> {
+    fn new() -> Self {
+        ArticleBuilder {
+            article: (),
+            author: (),
+            favorited: false,
+            favorites_count: None,
+            tag_list: (),
+        }
+    }
+}
+
+impl<ArticleT, AuthorT, TagsT> ArticleBuilder<ArticleT, AuthorT, TagsT> {
+    pub fn article(
+        self,
+        article: mdl::Article,
+        favorites_count: i64,
+        tag_list: Vec<String>,
+    ) -> ArticleBuilder<mdl::Article, AuthorT, Vec<String>> {
+        ArticleBuilder {
+            article,
+            author: self.author,
+            favorited: self.favorited,
+            favorites_count: Some(favorites_count),
+            tag_list,
+        }
+    }
+
+    pub fn author(self, author: Profile) -> ArticleBuilder<ArticleT, Profile, TagsT> {
+        ArticleBuilder {
+            article: self.article,
+            author,
+            favorited: self.favorited,
+            favorites_count: self.favorites_count,
+            tag_list: self.tag_list,
+        }
+    }
+
+    pub fn favorited(self, favorited: bool) -> ArticleBuilder<ArticleT, AuthorT, TagsT> {
+        ArticleBuilder { favorited, ..self }
+    }
+}
+
+impl ArticleBuilder<mdl::Article, Profile, Vec<String>> {
+    pub fn build(self) -> Article {
+        Article {
+            slug: self.article.slug,
+            title: self.article.title,
+            description: self.article.description,
+            body: self.article.body,
+            tag_list: self.tag_list,
+            created_at: DateTimeStr(self.article.created_at),
+            updated_at: DateTimeStr(self.article.updated_at),
+            favorited: self.favorited,
+            favorites_count: self.favorites_count.unwrap(),
+            author: self.author,
+        }
+    }
 }
 
 #[derive(Debug, Serialize)]

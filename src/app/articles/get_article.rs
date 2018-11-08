@@ -34,18 +34,13 @@ impl<T: GetArticle> CanGetArticle for T {
 
         let tags = select_tags(conn, article.id)?;
 
-        Ok(res::Article {
-            slug: article.slug,
-            title: article.title,
-            description: article.description,
-            body: article.body,
-            tag_list: tags,
-            created_at: res::DateTimeStr(article.created_at),
-            updated_at: res::DateTimeStr(article.updated_at),
-            favorited,
-            favorites_count,
-            author: res::Profile::from_user(author, author_followed),
-        })
+        let res = res::Article::new_builder()
+            .author(res::Profile::from_user(author, author_followed))
+            .article(article, favorites_count, tags)
+            .favorited(favorited)
+            .build();
+
+        Ok(res)
     }
 }
 
@@ -119,18 +114,10 @@ mod test {
 
         let res = Mock { conn }.get_article(&slug, None)?;
 
-        let expected = res::Article {
-            slug,
-            title: article.title,
-            description: article.description,
-            body: article.body,
-            tag_list: Vec::with_capacity(0),
-            created_at: res::DateTimeStr(article.created_at),
-            updated_at: res::DateTimeStr(article.updated_at),
-            favorited: false,
-            favorites_count: 0,
-            author: res::Profile::from_user(author, false),
-        };
+        let expected = res::Article::new_builder()
+            .author(res::Profile::from_user(author, false))
+            .article(article, 0, Vec::with_capacity(0))
+            .build();
         assert_eq!(res, expected);
 
         Ok(())
