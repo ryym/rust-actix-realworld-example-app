@@ -102,24 +102,76 @@ mod test {
         let conn = t.db_conn()?;
 
         let slug = "rust-is-fun".to_owned();
-        let author = db::users::insert(&conn, &mdl::NewUser::default(), HashedPassword::dummy())?;
-        let article = db::articles::insert(
-            &conn,
-            &mdl::NewArticle {
-                author_id: author.id,
-                slug: slug.clone(),
-                ..Default::default()
-            },
-        )?;
+        let author = insert_user(&conn, "author")?;
+        let article = insert_article(&conn, &slug, author.id)?;
+
+        let tags = vec!["a".to_owned(), "b".to_owned()];
+        db::articles::add_tags(&conn, article.id, tags.iter().cloned())?;
 
         let res = Mock { conn }.get_article(&slug, None)?;
 
         let expected = res::Article::new_builder()
             .author(res::Profile::from_user(author, false))
-            .article(article, 0, Vec::with_capacity(0))
+            .article(article, 0, tags)
             .build();
         assert_eq!(res, expected);
 
         Ok(())
+    }
+
+    #[test]
+    fn with_login() -> Result<()> {
+        let t = test::init()?;
+        let conn = t.db_conn()?;
+        let slug = "rust-is-so-fun".to_owned();
+
+        let author = insert_user(&conn, "author")?;
+        let article = insert_article(&conn, &slug, author.id)?;
+        let user = insert_user(&conn, "user")?;
+
+        db::articles::favorite(&conn, article.id, user.id)?;
+        db::followers::insert(
+            &conn,
+            &mdl::NewFollower {
+                user_id: author.id,
+                follower_id: user.id,
+            },
+        )?;
+
+        let res = Mock { conn }.get_article(&slug, Some(&user))?;
+
+        let expected = res::Article::new_builder()
+            .author(res::Profile::from_user(author, true))
+            .article(article, 1, Vec::with_capacity(0))
+            .favorited(true)
+            .build();
+        assert_eq!(res, expected);
+
+        Ok(())
+    }
+
+    fn insert_user(conn: &db::Conn, name: &str) -> Result<mdl::User> {
+        let author = db::users::insert(
+            &conn,
+            &mdl::NewUser {
+                username: name.to_owned(),
+                email: format!("{}@a.a", name),
+                ..Default::default()
+            },
+            HashedPassword::dummy(),
+        )?;
+        Ok(author)
+    }
+
+    fn insert_article(conn: &db::Conn, slug: &str, author_id: i32) -> Result<mdl::Article> {
+        let article = db::articles::insert(
+            &conn,
+            &mdl::NewArticle {
+                author_id,
+                slug: slug.to_owned(),
+                ..Default::default()
+            },
+        )?;
+        Ok(article)
     }
 }
