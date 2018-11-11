@@ -109,3 +109,80 @@ where
     let user = User::from_model(auth.token, user);
     Ok(Json(UserResponse { user }))
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use actix_web::http::header;
+    use actix_web::{test::TestRequest, FromRequest, Json, State};
+    use chrono::NaiveDate;
+    use crate::mdl;
+    use crate::test::{Mock, Store};
+    use futures::Future;
+
+    #[test]
+    fn sign_up_registers_user() -> Result<()> {
+        impl CanValidateSignup for Mock {
+            fn validate_signup(&self, _form: &SignupUser) -> Result<()> {
+                Ok(())
+            }
+        }
+        impl CanRegisterUser for Mock {
+            fn register_user(&self, form: &SignupUser) -> Result<mdl::User> {
+                let created_at = NaiveDate::from_ymd(2018, 1, 1).and_hms(9, 10, 11);
+                let user = mdl::User {
+                    id: 1,
+                    username: form.username.clone(),
+                    email: form.email.clone(),
+                    bio: None,
+                    image: None,
+                    created_at,
+                    updated_at: created_at,
+                };
+                Ok(user)
+            }
+        }
+        impl CanGenerateJwt for Mock {
+            fn generate_jwt(&self, user_id: i32) -> Result<String> {
+                Ok(format!("jwt-token-{}", user_id))
+            }
+        }
+
+        let input = r#"{
+            "user": {
+                "username": "hello",
+                "email": "a@b.cc",
+                "password": "password"
+            }
+        }"#;
+
+        let store = Store(Mock {});
+
+        let req = TestRequest::with_state(store)
+            .header(
+                header::CONTENT_TYPE,
+                header::HeaderValue::from_static("application/json"),
+            ).set_payload(input)
+            .finish();
+
+        Json::extract(&req)
+            .and_then(|form| {
+                let store = State::extract(&req);
+                let res = sign_up((form, store))?;
+
+                assert_eq!(
+                    res.user,
+                    User {
+                        username: "hello".to_owned(),
+                        email: "a@b.cc".to_owned(),
+                        token: "jwt-token-1".to_owned(),
+                        bio: None,
+                        image: None,
+                    }
+                );
+
+                Ok(())
+            }).from_err()
+            .wait()
+    }
+}

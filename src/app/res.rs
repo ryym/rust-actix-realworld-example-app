@@ -3,7 +3,7 @@ use serde::ser::{Serialize, Serializer};
 
 use crate::mdl;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, PartialEq, Serialize)]
 pub struct User {
     pub email: String,
     pub token: String,

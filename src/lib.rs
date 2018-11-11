@@ -24,6 +24,9 @@ extern crate diesel;
 extern crate r2d2;
 
 #[cfg(test)]
+extern crate futures;
+
+#[cfg(test)]
 #[macro_use]
 mod test;
 

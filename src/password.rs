@@ -11,6 +11,11 @@ pub struct HashedPassword(String);
 
 impl HashedPassword {
     #[cfg(test)]
+    pub fn new<S: Into<String>>(hashed: S) -> Self {
+        HashedPassword(hashed.into())
+    }
+
+    #[cfg(test)]
     pub fn dummy() -> Self {
         HashedPassword("dummy".to_owned())
     }

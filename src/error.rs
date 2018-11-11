@@ -121,3 +121,12 @@ impl From<DieselError> for Error {
         }.into()
     }
 }
+
+#[cfg(test)]
+impl From<actix_web::Error> for Error {
+    fn from(err: actix_web::Error) -> Error {
+        Error {
+            inner: Context::new(ErrorKind::Misc(err.to_string())),
+        }
+    }
+}
