@@ -17,6 +17,7 @@ extern crate jsonwebtoken;
 extern crate pbkdf2;
 extern crate rand;
 extern crate serde_json;
+extern crate slug;
 
 extern crate chrono;
 #[macro_use]
