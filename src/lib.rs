@@ -14,8 +14,10 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate jsonwebtoken;
+extern crate lazy_static;
 extern crate pbkdf2;
 extern crate rand;
+extern crate regex;
 extern crate serde_json;
 extern crate slug;
 
