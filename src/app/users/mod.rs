@@ -113,12 +113,10 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use actix_web::http::header;
     use actix_web::{test::TestRequest, FromRequest, Json, State};
     use chrono::NaiveDate;
     use crate::mdl;
     use crate::test::{Mock, Store};
-    use futures::Future;
 
     #[test]
     fn sign_up_registers_user() -> Result<()> {
@@ -148,41 +146,29 @@ mod test {
             }
         }
 
-        let input = r#"{
-            "user": {
-                "username": "hello",
-                "email": "a@b.cc",
-                "password": "password"
-            }
-        }"#;
-
         let store = Store(Mock {});
+        let req = TestRequest::with_state(store).finish();
+        let state = State::extract(&req);
+        let form = Json(In {
+            user: SignupUser {
+                username: "hello".to_owned(),
+                email: "a@b.cc".to_owned(),
+                password: "password".to_owned(),
+            },
+        });
 
-        let req = TestRequest::with_state(store)
-            .header(
-                header::CONTENT_TYPE,
-                header::HeaderValue::from_static("application/json"),
-            ).set_payload(input)
-            .finish();
+        let res = sign_up((form, state))?;
+        assert_eq!(
+            res.user,
+            User {
+                username: "hello".to_owned(),
+                email: "a@b.cc".to_owned(),
+                token: "jwt-token-1".to_owned(),
+                bio: None,
+                image: None,
+            }
+        );
 
-        Json::extract(&req)
-            .and_then(|form| {
-                let store = State::extract(&req);
-                let res = sign_up((form, store))?;
-
-                assert_eq!(
-                    res.user,
-                    User {
-                        username: "hello".to_owned(),
-                        email: "a@b.cc".to_owned(),
-                        token: "jwt-token-1".to_owned(),
-                        bio: None,
-                        image: None,
-                    }
-                );
-
-                Ok(())
-            }).from_err()
-            .wait()
+        Ok(())
     }
 }
